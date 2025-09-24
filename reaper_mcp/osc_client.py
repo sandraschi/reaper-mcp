@@ -6,7 +6,6 @@ Real-time bidirectional control via Open Sound Control protocol
 import logging
 from typing import Dict, Any, Optional, List
 import asyncio
-from pythonosc import osc
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import AsyncIOOSCUDPServer
 from pythonosc.udp_client import SimpleUDPClient

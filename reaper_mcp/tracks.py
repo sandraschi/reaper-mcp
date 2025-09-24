@@ -1,11 +1,12 @@
 """
-tracks.py - Reaper track management tools for FastMCP 2.1  
+tracks.py - Reaper track management tools for FastMCP 2.1
 Austrian precision track control and automation
 """
 
 import logging
 from typing import Dict, Any, List
 from .osc_client import get_reaper_client, ensure_connected
+from .validation import TrackValidation, CommonValidation, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -52,69 +53,105 @@ def register_track_tools(mcp):
     @mcp.tool()
     async def get_track_info(track_id: int) -> Dict[str, Any]:
         """Get detailed information for specific track
-        
+
         Args:
             track_id: Track number (1-based indexing)
-            
+
         Returns:
             Dictionary with track details
         """
-        if not await ensure_connected():
+        # Input validation
+        try:
+            validated_track_id = TrackValidation.validate_track_id(track_id)
+        except ValidationError as e:
             return {
                 "track_id": track_id,
-                "error": "Not connected to Reaper"
+                "success": False,
+                "error": str(e),
+                "suggestion": "Use a valid track number (1 or greater)"
             }
-        
+
+        if not await ensure_connected():
+            return {
+                "track_id": validated_track_id,
+                "success": False,
+                "error": "Not connected to Reaper",
+                "suggestion": "Start Reaper and enable OSC control"
+            }
+
         try:
             client = await get_reaper_client()
-            track_info = await client.get_track_info(track_id)
+            track_info = await client.get_track_info(validated_track_id)
             return {
                 **track_info,
+                "track_id": validated_track_id,
+                "success": True,
                 "austrian_precision": "Track info retrieved! 🎼"
             }
         except Exception as e:
-            logger.error(f"Get track info error: {e}")
+            logger.error(f"Get track info error for track {validated_track_id}: {e}")
             return {
-                "track_id": track_id,
-                "error": str(e)
+                "track_id": validated_track_id,
+                "success": False,
+                "error": str(e),
+                "suggestion": "Check if track exists and Reaper is responsive"
             }
     
     @mcp.tool()
     async def arm_track_recording(track_id: int, armed: bool = True) -> Dict[str, Any]:
         """Arm or disarm track for recording
-        
+
         Args:
             track_id: Track number to arm/disarm
             armed: True to arm, False to disarm
-            
+
         Returns:
             Dictionary with arming status
         """
+        # Input validation
+        try:
+            validated_track_id = TrackValidation.validate_track_id(track_id)
+            validated_armed = CommonValidation.validate_boolean(armed)
+        except ValidationError as e:
+            return {
+                "track_id": track_id,
+                "armed": armed,
+                "success": False,
+                "error": str(e),
+                "suggestion": "Use valid track ID and true/false for armed parameter"
+            }
+
         if not await ensure_connected():
             return {
-                "track_id": track_id,
-                "armed": armed,
+                "track_id": validated_track_id,
+                "armed": validated_armed,
                 "success": False,
-                "error": "Not connected to Reaper"
+                "error": "Not connected to Reaper",
+                "suggestion": "Start Reaper and enable OSC control"
             }
-        
+
         try:
             client = await get_reaper_client()
-            result = await client.set_track_arm(track_id, armed)
-            
-            action = "🔴 Armed" if armed else "⚪ Disarmed"
+            result = await client.set_track_arm(validated_track_id, validated_armed)
+
+            action = "🔴 Armed" if validated_armed else "⚪ Disarmed"
             return {
                 **result,
-                "message": f"{action} track {track_id} for recording",
-                "ready_to_record": armed
+                "track_id": validated_track_id,
+                "armed": validated_armed,
+                "success": True,
+                "message": f"{action} track {validated_track_id} for recording",
+                "ready_to_record": validated_armed,
+                "austrian_precision": "Recording status updated! 🎙️"
             }
         except Exception as e:
-            logger.error(f"Track arm error: {e}")
+            logger.error(f"Track arm error for track {validated_track_id}: {e}")
             return {
-                "track_id": track_id,
-                "armed": armed,
+                "track_id": validated_track_id,
+                "armed": validated_armed,
                 "success": False,
-                "error": str(e)
+                "error": str(e),
+                "suggestion": "Check if track exists and Reaper is responsive"
             }
     
     @mcp.tool()

@@ -1,0 +1,207 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  release:
+    types: [published]
+
+jobs:
+  test:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-${{ matrix.python-version }}-
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .[dev]
+
+    - name: Run linting
+      run: |
+        black --check --diff reaper_mcp tests
+        isort --check-only --diff reaper_mcp tests
+        flake8 reaper_mcp tests
+
+    - name: Run type checking
+      run: |
+        mypy reaper_mcp
+
+    - name: Run tests
+      run: |
+        pytest tests/ -v --cov=reaper_mcp --cov-report=xml --cov-report=term-missing
+
+    - name: Upload coverage to Codecov
+      if: matrix.python-version == '3.11'
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-${{ matrix.python-version }}
+        path: |
+          test_results/
+          htmlcov/
+        retention-days: 30
+
+  build:
+    needs: test
+    runs-on: windows-latest
+    if: github.event_name == 'release' || github.ref == 'refs/heads/main'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+
+    - name: Build package
+      run: python -m build
+
+    - name: Validate package
+      run: |
+        twine check dist/*
+        python -c "import fastmcp; print(f'FastMCP version: {fastmcp.__version__}')"
+        python -c "import reaper_mcp; print('Package imports successfully')"
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: dist/
+        retention-days: 30
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
+        path: dist/
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+
+  deploy-docs:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install documentation dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[docs]
+
+    - name: Build documentation
+      run: |
+        cd docs
+        make html
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: docs/build/html
+
+  validate-mcp:
+    runs-on: windows-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Validate MCP server
+      run: |
+        # Test MCP server initialization
+        python -c "
+        from fastmcp import FastMCP
+        from reaper_mcp.transport import register_transport_tools
+        from reaper_mcp.tracks import register_track_tools
+        from reaper_mcp.project import register_project_tools
+
+        mcp = FastMCP('test-server', '1.0.0', 'Test server')
+        register_transport_tools(mcp)
+        register_track_tools(mcp)
+        register_project_tools(mcp)
+        print('✓ MCP server validates successfully')
+        print(f'✓ Registered {len(mcp._tools)} tools')
+        "
+
+    - name: Test MCP packaging validation
+      run: |
+        # Test that the package can be built and validated
+        pip install build
+        python -m build --wheel
+        python -c "
+        import zipfile
+        import os
+        wheel_files = [f for f in os.listdir('dist') if f.endswith('.whl')]
+        if wheel_files:
+            with zipfile.ZipFile(f'dist/{wheel_files[0]}') as zf:
+                files = zf.namelist()
+                assert any('reaper_mcp' in f for f in files), 'Package missing reaper_mcp module'
+                assert any('prompts' in f for f in files), 'Package missing prompts'
+            print('✓ Package structure validated')
+        else:
+            print('✗ No wheel file found')
+            exit(1)
+        "
