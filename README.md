@@ -1,136 +1,62 @@
 # Reaper MCP Server 🎵
 
-**FastMCP 2.1** compliant server for **Austrian precision digital audio workstation automation via Reaper DAW**.
+[![FastMCP](https://img.shields.io/badge/FastMCP-2.13.1-blue.svg)](https://gofastmcp.com)
+[![Portmanteau](https://img.shields.io/badge/Tools-4%20Portmanteau-purple.svg)](#-portmanteau-tools)
 
-## Features 🎯
+**Austrian precision DAW automation via Reaper with OSC control.**
 
-- ✅ **FastMCP 2.1 compliance** - Modern async/await patterns
-- ✅ **Real OSC integration** - Bidirectional communication with Reaper
-- ✅ **Transport control** - Play, stop, pause, record automation
-- ✅ **Track management** - Mute, solo, arm, bulk operations
-- ✅ **Project automation** - Save, markers, rendering control
-- ✅ **Austrian engineering quality** - Precision and reliability 🇦🇹
+## ✨ What's New (v2.0)
 
-## Quick Start 🚀
+- **FastMCP 2.13.1** - Latest MCP framework
+- **Portmanteau Tools** - 21 tools consolidated into 4 clean interfaces (81% reduction!)
+- **Streamlined CI/CD** - Single workflow, ruff linting
+
+## 🎛️ Portmanteau Tools
+
+| Tool | Operations | Description |
+|------|------------|-------------|
+| `reaper_transport` | play, stop, pause, record, position, status | Playback control |
+| `reaper_tracks` | list, info, mute, solo, arm, count, bulk | Track management |
+| `reaper_project` | info, save, marker, render, stats | Project operations |
+| `reaper_system` | status, help, capabilities | System status |
+
+### Tool Mode
+
+Set `REAPER_TOOL_MODE` environment variable:
+- `portmanteau` (default) - 4 consolidated tools
+- `individual` - 21 individual tools (backward compatibility)
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
 - **Reaper DAW** installed and running
-- **Python 3.9+** with asyncio support
-- **OSC enabled** in Reaper (see setup below)
+- **Python 3.10+**
+- **OSC enabled** in Reaper
 
 ### Installation
 
-```bash
+```powershell
 cd D:\Dev\repos\reaper-mcp
 pip install -r requirements.txt
+pip install -e .
 ```
 
 ### Reaper OSC Setup 🎛️
 
 1. Open **Reaper preferences** (Ctrl+P)
 2. Go to **Control/OSC/web**
-3. Click **Add** to create new OSC device
+3. Click **Add** → new OSC device
 4. Configure:
    - **Local IP**: `127.0.0.1`
    - **Local listen port**: `8000`
    - **Remote port**: `8001`
-   - **Pattern config**: `Default.ReaperOSC`
    - ✅ Enable **"Send all feedback"**
 5. Click **OK** and **Apply**
 
-### Testing
+### Claude Desktop Config
 
-```bash
-python dev_test.py    # Test OSC connection and functionality
-python server.py      # Start MCP server
-```
-
-## Usage Examples 🎼
-
-### Transport Control
-
-```python
-# Start playback
-await play_transport()
-
-# Stop and get position
-await stop_transport()
-position = await get_transport_position()
-
-# Record with armed tracks
-await record_transport()
-```
-
-### Track Management
-
-```python
-# Get all tracks
-tracks = await get_tracks()
-
-# Mute track 3
-await mute_track(3, muted=True)
-
-# Bulk solo tracks 1,2,3
-await bulk_track_operation("solo", [1,2,3], True)
-
-# Arm track for recording
-await arm_track_recording(1, armed=True)
-```
-
-### Project Operations
-
-```python
-# Get project info
-info = await get_project_info()
-
-# Add marker at 2:30
-await add_marker("2:30", "Chorus Start")
-
-# Save project
-await save_project()
-
-# Render project
-await render_project("wav", "high", "project")
-```
-
-## FastMCP 2.1 Tools 🔧
-
-### Transport Control
-
-- `play_transport()` - Start playback
-- `stop_transport()` - Stop playback  
-- `pause_transport()` - Pause playback
-- `record_transport()` - Start recording
-- `get_transport_position()` - Get current position
-- `transport_status()` - Complete transport state
-
-### Track Management
-
-- `get_tracks()` - List all tracks with details
-- `get_track_info(track_id)` - Specific track information
-- `arm_track_recording(track_id, armed)` - Arm/disarm for recording
-- `mute_track(track_id, muted)` - Mute/unmute track
-- `solo_track(track_id, solo)` - Solo/unsolo track
-- `get_track_count()` - Total track count
-- `bulk_track_operation(operation, track_ids, value)` - Bulk operations
-
-### Project Management
-
-- `get_project_info()` - Project details and statistics
-- `save_project()` - Save current project
-- `add_marker(position, name)` - Add timeline marker
-- `render_project(format, quality, bounds)` - Render/bounce
-- `get_project_stats()` - Comprehensive project metrics
-
-### System Tools
-
-- `get_server_status()` - Server and connection status
-- `list_capabilities()` - Available tools and categories
-
-## Claude Desktop Integration 📱
-
-Add to Claude Desktop MCP configuration:
+Add to `claude_desktop_config.json`:
 
 ```json
 {
@@ -144,111 +70,118 @@ Add to Claude Desktop MCP configuration:
 }
 ```
 
-## Configuration ⚙️
+## 🎼 Usage Examples
 
-Copy `.env.template` to `.env` and customize:
+### Natural Language (via Claude)
+
+```
+"Play the project"
+"Mute track 3"
+"Solo tracks 1 and 2"
+"Add a marker called 'Chorus' at 1:30"
+"Save the project"
+"Arm track 1 for recording and start recording"
+```
+
+### Portmanteau Tool Examples
+
+```python
+# Transport control
+reaper_transport("play")
+reaper_transport("stop")
+reaper_transport("record")
+reaper_transport("status")
+
+# Track management
+reaper_tracks("list")
+reaper_tracks("mute", track_id=3, value=True)
+reaper_tracks("solo", track_id=1)
+reaper_tracks("arm", track_id=1, value=True)
+reaper_tracks("bulk", track_ids=[1,2,3], bulk_operation="mute", value=True)
+
+# Project operations
+reaper_project("info")
+reaper_project("save")
+reaper_project("marker", position="1:30", name="Chorus")
+reaper_project("render", format="wav", quality="high")
+
+# System status
+reaper_system("status")
+reaper_system("help")
+reaper_system("capabilities")
+```
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Claude / Cursor                          │
+│                         (MCP Client)                            │
+└─────────────────────────┬───────────────────────────────────────┘
+                          │ MCP Protocol (stdio)
+                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      Reaper MCP Server                          │
+│                       (FastMCP 2.13.1)                          │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │              4 Portmanteau Tools                          │   │
+│  │  reaper_transport │ reaper_tracks │ reaper_project │ ...  │   │
+│  └──────────────────────────┬───────────────────────────────┘   │
+│                             ▼                                    │
+│              ┌─────────────────────┐                            │
+│              │     OSC Client      │                            │
+│              │    (python-osc)     │                            │
+│              └──────────┬──────────┘                            │
+└─────────────────────────┼───────────────────────────────────────┘
+                          │ OSC UDP (localhost:8000)
+                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                         Reaper DAW                              │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │                   OSC Control Surface                      │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌─────────────┐  │
+│  │ Transport │  │  Tracks   │  │  Mixer    │  │   Project   │  │
+│  └───────────┘  └───────────┘  └───────────┘  └─────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Configuration
+
+### Environment Variables
 
 ```env
-# Server configuration
-SERVER_NAME=reaper-mcp
-SERVER_VERSION=1.0.0
-DEBUG=true
-
-# Reaper configuration  
-REAPER_PATH="C:\Program Files\REAPER\reaper.exe"
-REAPER_PROJECT_PATH=D:\Music\Projects
+# OSC Settings
 OSC_HOST=127.0.0.1
 OSC_PORT=8000
 
-# Audio settings
-DEFAULT_SAMPLE_RATE=44100
-DEFAULT_BIT_DEPTH=24
-AUTO_SAVE_INTERVAL=300
+# Tool mode
+REAPER_TOOL_MODE=portmanteau  # or "individual"
+
+# Reaper paths (optional)
+REAPER_PATH=C:/Program Files/REAPER/reaper.exe
+REAPER_PROJECT_PATH=D:/Music/Projects
 ```
 
-## Troubleshooting 🔍
+## Troubleshooting
 
-### Connection Issues
+### "Not connected to Reaper"
 
-- **OSC not connecting**: Check Reaper OSC settings and firewall
-- **No feedback**: Verify "Send all feedback" is enabled
-- **Port conflicts**: Ensure ports 8000/8001 are available
-- **Permission denied**: Run as administrator if needed
+1. Ensure Reaper is running
+2. Verify OSC is enabled in Reaper preferences
+3. Check port 8000 isn't blocked
 
-### Common Solutions
+### "OSC no response"
 
-```bash
-# Test OSC connection
-python dev_test.py
+1. Enable "Send all feedback" in Reaper OSC settings
+2. Verify Local listen port matches (8000)
 
-# Check Reaper OSC status
-# In Reaper: Actions → Show action list → Search "OSC"
+## 🇦🇹 Austrian Efficiency
 
-# Restart OSC in Reaper
-# Preferences → Control/OSC/web → Disable/Enable device
-```
-
-## Architecture 🏗️
-
-```
-reaper-mcp/
-├── reaper_mcp/
-│   ├── __init__.py           # Package constants
-│   ├── osc_client.py         # OSC communication layer
-│   ├── transport.py          # Transport control tools
-│   ├── tracks.py             # Track management tools
-│   └── project.py            # Project automation tools
-├── server.py                 # FastMCP 2.1 main server
-├── dev_test.py               # Development testing
-├── requirements.txt          # Dependencies
-├── .env.template             # Configuration template
-└── README.md                 # This documentation
-```
-
-## Austrian Context 🇦🇹
-
-**Sandra's Audio Setup**:
-
-- Windows-based Reaper installation
-- Standard OSC configuration (localhost:8000)
-- Professional audio production workflow
-- German language support in messages
-- Budget-conscious efficiency (~€100/month constraint)
-
-## Dependencies 📦
-
-- **FastMCP 2.1+** - Modern MCP server framework
-- **python-osc** - OSC protocol communication
-- **mido** - MIDI support (future expansion)
-- **aiofiles** - Async file operations
-- **pydantic** - Data validation
-
-## Development 👩‍💻
-
-```bash
-# Install development dependencies
-pip install -r requirements.txt
-
-# Test OSC functionality
-python dev_test.py
-
-# Run server locally
-python server.py
-
-# Check connections
-python -c "import asyncio; from reaper_mcp.osc_client import ReaperOSCClient; asyncio.run(ReaperOSCClient().connect())"
-```
-
-## License ⚖️
-
-MIT License - Austrian engineering quality with international compatibility.
-
-## Author 🎼
-
-**Sandra's Austrian Audio Automation 🇦🇹**
-
-*"Sin temor y sin esperanza" - Practical audio automation without hype.*
+- **4 tools** instead of 21 (81% reduction!)
+- **Practical solutions** over theoretical complexity
+- **No decision paralysis** - exactly what you need
 
 ---
 
-**Ready for professional audio automation in Vienna! 🎵🇦🇹**
+**Built with Austrian precision for professional DAW automation! 🎵🇦🇹**

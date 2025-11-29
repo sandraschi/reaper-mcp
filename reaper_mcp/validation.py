@@ -4,8 +4,7 @@ Comprehensive parameter validation with user-friendly error messages
 """
 
 import logging
-from typing import Union, List, Tuple, Optional
-from pydantic import BaseModel, Field, validator
+from typing import Union, List
 
 logger = logging.getLogger(__name__)
 

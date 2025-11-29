@@ -155,9 +155,6 @@ def register_project_tools(mcp):
         try:
             # Note: Reaper's OSC doesn't directly support rendering
             # This would typically require ReaScript or custom actions
-            
-            client = await get_reaper_client()
-            
             # For now, return status indicating render would be initiated
             return {
                 "format": format,

@@ -1,0 +1,59 @@
+{
+  "name": "reaper-mcp",
+  "version": "1.0.0",
+  "description": "Austrian precision Digital Audio Workstation automation via Reaper DAW with bidirectional OSC communication",
+  "author": "Sandra",
+  "license": "MIT",
+  "homepage": "https://github.com/sandraschi/reaper-mcp",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sandraschi/reaper-mcp"
+  },
+  "main": "server/server.py",
+  "mcp": {
+    "version": "1.0",
+    "capabilities": ["tools"],
+    "prompts": {
+      "system": "assets/prompts/system.md",
+      "recording_workflow": "assets/prompts/recording_workflow.md",
+      "mixing_mastering": "assets/prompts/mixing_mastering.md",
+      "production_tips": "assets/prompts/production_tips.md",
+      "troubleshooting": "assets/prompts/troubleshooting.md"
+    }
+  },
+  "runtime": {
+    "python": ">=3.9"
+  },
+  "dependencies": {
+    "fastmcp": ">=2.1.0",
+    "python-osc": ">=1.8.0",
+    "pydantic": ">=2.0.0"
+  },
+  "features": [
+    "Transport control (play, stop, pause, record)",
+    "Track management (mute, solo, arm, bulk operations)",
+    "Project automation (save, markers, rendering)",
+    "Bidirectional OSC communication",
+    "Real-time status monitoring",
+    "Session management",
+    "Marker and region control",
+    "Austrian engineering quality"
+  ],
+  "requirements": {
+    "software": ["Reaper DAW 6.0 or later"],
+    "config": ["OSC enabled in Reaper preferences"],
+    "network": ["Ports 8000-8001 available for OSC"]
+  },
+  "keywords": [
+    "reaper",
+    "daw",
+    "audio",
+    "production",
+    "recording",
+    "mixing",
+    "automation",
+    "osc",
+    "austria"
+  ]
+}
+
