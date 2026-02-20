@@ -102,7 +102,11 @@ def setup_transport_portmanteau(mcp):
 
             elif operation == "position":
                 result = await client.get_position()
-                position = result.get("args", ["0:00:00"])[0] if result.get("args") else "0:00:00"
+                position = (
+                    result.get("args", ["0:00:00"])[0]
+                    if result.get("args")
+                    else "0:00:00"
+                )
                 return {
                     "operation": "position",
                     "position": position,
@@ -112,7 +116,11 @@ def setup_transport_portmanteau(mcp):
 
             elif operation == "status":
                 position_info = await client.get_position()
-                position = position_info.get("args", ["0:00:00"])[0] if position_info.get("args") else "0:00:00"
+                position = (
+                    position_info.get("args", ["0:00:00"])[0]
+                    if position_info.get("args")
+                    else "0:00:00"
+                )
                 return {
                     "operation": "status",
                     "connected": client.connected,
@@ -130,4 +138,3 @@ def setup_transport_portmanteau(mcp):
                 "success": False,
                 "error": str(e),
             }
-

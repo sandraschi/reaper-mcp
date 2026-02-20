@@ -9,7 +9,7 @@ from reaper_mcp.validation import (
     TransportValidation,
     ProjectValidation,
     CommonValidation,
-    ValidationError
+    ValidationError,
 )
 
 
@@ -97,7 +97,10 @@ class TestProjectValidation:
         """Test valid marker name validation"""
         assert ProjectValidation.validate_marker_name("Verse 1") == "Verse 1"
         assert ProjectValidation.validate_marker_name("  Chorus  ") == "Chorus"
-        assert ProjectValidation.validate_marker_name("Marker with 123") == "Marker with 123"
+        assert (
+            ProjectValidation.validate_marker_name("Marker with 123")
+            == "Marker with 123"
+        )
 
     def test_validate_marker_name_invalid(self):
         """Test invalid marker name validation"""
@@ -118,7 +121,7 @@ class TestProjectValidation:
 
     def test_validate_render_format_valid(self):
         """Test valid render format validation"""
-        valid_formats = ['wav', 'mp3', 'flac', 'ogg', 'wma', 'aiff', 'au']
+        valid_formats = ["wav", "mp3", "flac", "ogg", "wma", "aiff", "au"]
         for fmt in valid_formats:
             assert ProjectValidation.validate_render_format(fmt) == fmt.lower()
             assert ProjectValidation.validate_render_format(fmt.upper()) == fmt.lower()
@@ -130,10 +133,12 @@ class TestProjectValidation:
 
     def test_validate_quality_valid(self):
         """Test valid quality validation"""
-        valid_qualities = ['high', 'medium', 'low', 'fast']
+        valid_qualities = ["high", "medium", "low", "fast"]
         for quality in valid_qualities:
             assert ProjectValidation.validate_quality(quality) == quality.lower()
-            assert ProjectValidation.validate_quality(quality.upper()) == quality.lower()
+            assert (
+                ProjectValidation.validate_quality(quality.upper()) == quality.lower()
+            )
 
     def test_validate_quality_invalid(self):
         """Test invalid quality validation"""
@@ -147,12 +152,42 @@ class TestCommonValidation:
     def test_validate_boolean_valid(self):
         """Test valid boolean validation"""
         # True values
-        true_values = [True, 1, "true", "True", "TRUE", "yes", "Yes", "YES", "1", "on", "On", "ON", "enabled", "Enabled"]
+        true_values = [
+            True,
+            1,
+            "true",
+            "True",
+            "TRUE",
+            "yes",
+            "Yes",
+            "YES",
+            "1",
+            "on",
+            "On",
+            "ON",
+            "enabled",
+            "Enabled",
+        ]
         for value in true_values:
             assert CommonValidation.validate_boolean(value) is True
 
         # False values
-        false_values = [False, 0, "false", "False", "FALSE", "no", "No", "NO", "0", "off", "Off", "OFF", "disabled", "Disabled"]
+        false_values = [
+            False,
+            0,
+            "false",
+            "False",
+            "FALSE",
+            "no",
+            "No",
+            "NO",
+            "0",
+            "off",
+            "Off",
+            "OFF",
+            "disabled",
+            "Disabled",
+        ]
         for value in false_values:
             assert CommonValidation.validate_boolean(value) is False
 

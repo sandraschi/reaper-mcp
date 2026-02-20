@@ -5,7 +5,9 @@ FastMCP 2.1 compliant audio workstation automation for Reaper DAW
 
 __version__ = "1.0.0"
 __author__ = "Sandra's Austrian Audio Automation 🇦🇹"
-__description__ = "Reaper DAW automation with OSC control and Austrian engineering quality"
+__description__ = (
+    "Reaper DAW automation with OSC control and Austrian engineering quality"
+)
 
 # Default Reaper configuration
 DEFAULT_OSC_HOST = "127.0.0.1"
@@ -25,7 +27,7 @@ OSC_PATTERNS = {
         "stop": "/stop",
         "pause": "/pause",
         "record": "/record",
-        "position": "/position"
+        "position": "/position",
     },
     "tracks": {
         "count": "/track/count",
@@ -34,17 +36,13 @@ OSC_PATTERNS = {
         "solo": "/track/{}/solo",
         "arm": "/track/{}/recarm",
         "volume": "/track/{}/volume",
-        "pan": "/track/{}/pan"
+        "pan": "/track/{}/pan",
     },
     "project": {
         "name": "/project/name",
         "sample_rate": "/project/samplerate",
         "length": "/project/length",
-        "save": "/project/save"
+        "save": "/project/save",
     },
-    "markers": {
-        "add": "/marker/add",
-        "delete": "/marker/{}",
-        "list": "/marker/list"
-    }
+    "markers": {"add": "/marker/add", "delete": "/marker/{}", "list": "/marker/list"},
 }

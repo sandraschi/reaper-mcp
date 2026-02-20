@@ -12,7 +12,9 @@
   "main": "server/server.py",
   "mcp": {
     "version": "1.0",
-    "capabilities": ["tools"],
+    "capabilities": [
+      "tools"
+    ],
     "prompts": {
       "system": "assets/prompts/system.md",
       "recording_workflow": "assets/prompts/recording_workflow.md",
@@ -25,9 +27,10 @@
     "python": ">=3.9"
   },
   "dependencies": {
-    "fastmcp": ">=2.1.0",
+    "fastmcp": ">=2.14.4",
     "python-osc": ">=1.8.0",
-    "pydantic": ">=2.0.0"
+    "pydantic": ">=2.0.0",
+    "reapy-boost": ">=0.5.0"
   },
   "features": [
     "Transport control (play, stop, pause, record)",
@@ -37,12 +40,19 @@
     "Real-time status monitoring",
     "Session management",
     "Marker and region control",
-    "Austrian engineering quality"
+    "Austrian engineering quality",
+    "ReaScript Python integration"
   ],
   "requirements": {
-    "software": ["Reaper DAW 6.0 or later"],
-    "config": ["OSC enabled in Reaper preferences"],
-    "network": ["Ports 8000-8001 available for OSC"]
+    "software": [
+      "Reaper DAW 6.0 or later"
+    ],
+    "config": [
+      "OSC enabled in Reaper preferences"
+    ],
+    "network": [
+      "Ports 8000-8001 available for OSC"
+    ]
   },
   "keywords": [
     "reaper",
@@ -53,7 +63,8 @@
     "mixing",
     "automation",
     "osc",
-    "austria"
+    "austria",
+    "reascript",
+    "python"
   ]
 }
-

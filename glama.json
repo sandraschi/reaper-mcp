@@ -1,0 +1,38 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "maintainers": ["sandraschi"],
+  "name": "reaper-mcp",
+  "description": "FastMCP 2.13.1 server for DAW automation via Reaper with OSC control. 4 portmanteau tools consolidating 21 operations for transport, tracks, projects, and system management. Beta status.",
+  "type": "mcp_server",
+  "status": "beta",
+  "framework": "FastMCP 2.13.1",
+  "tools": 4,
+  "transport": ["stdio"],
+  "keywords": [
+    "reaper",
+    "daw",
+    "audio",
+    "music-production",
+    "osc",
+    "automation",
+    "mcp-server",
+    "fastmcp"
+  ],
+  "features": {
+    "transport_control": {
+      "enabled": true,
+      "operations": ["play", "stop", "pause", "record", "position"]
+    },
+    "track_management": {
+      "enabled": true
+    },
+    "project_operations": {
+      "enabled": true,
+      "features": ["save", "markers", "render", "stats"]
+    },
+    "osc_control": {
+      "enabled": true
+    }
+  }
+}
+

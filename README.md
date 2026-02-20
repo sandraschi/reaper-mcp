@@ -83,6 +83,22 @@ Add to `claude_desktop_config.json`:
 "Arm track 1 for recording and start recording"
 ```
 
+### ReaScript JSON Support 📊
+
+Scripts can now return structured data by setting the `_result` variable:
+
+```python
+import reapy
+project = reapy.Project.today()
+_result = {
+    "name": project.name, 
+    "tracks": project.n_tracks, 
+    "sample_rate": project.sample_rate
+}
+```
+
+The `reaper_reascript` tool will automatically detect and return this data as a JSON object.
+
 ### Portmanteau Tool Examples
 
 ```python
@@ -162,6 +178,14 @@ REAPER_TOOL_MODE=portmanteau  # or "individual"
 REAPER_PATH=C:/Program Files/REAPER/reaper.exe
 REAPER_PROJECT_PATH=D:/Music/Projects
 ```
+
+## 🧪 Testing Scaffold
+
+This project includes an extensive testing scaffold for both local development and CI:
+
+- **Unit Tests**: `pytest tests/unit` (Mocked OSC/Reapy)
+- **Integration Tests**: `pytest tests/integration` (Local server loopback)
+- **E2E Verification**: `python scripts/verify_e2e.py` (Stdio transport verification)
 
 ## Troubleshooting
 

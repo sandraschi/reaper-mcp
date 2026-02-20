@@ -12,13 +12,11 @@ from reaper_mcp import DEFAULT_OSC_HOST, DEFAULT_OSC_PORT
 # Configure structured logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler('dev_test.log', mode='w')
-    ]
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(), logging.FileHandler("dev_test.log", mode="w")],
 )
 logger = logging.getLogger(__name__)
+
 
 async def test_osc_connection():
     """Test basic OSC connection to Reaper"""
@@ -29,14 +27,16 @@ async def test_osc_connection():
     try:
         connected = await client.connect()
         if connected:
-            logger.info(f"✅ Connected to Reaper OSC at {DEFAULT_OSC_HOST}:{DEFAULT_OSC_PORT}")
+            logger.info(
+                f"✅ Connected to Reaper OSC at {DEFAULT_OSC_HOST}:{DEFAULT_OSC_PORT}"
+            )
 
             # Test ping
             ping_result = await client.ping()
             logger.info(f"📡 Ping test: {'✅ Success' if ping_result else '❌ Failed'}")
 
         else:
-            logger.error(f"❌ Failed to connect to Reaper OSC")
+            logger.error("❌ Failed to connect to Reaper OSC")
             logger.warning("💡 Make sure Reaper is running with OSC enabled")
 
     except Exception as e:
@@ -45,6 +45,7 @@ async def test_osc_connection():
 
     finally:
         await client.disconnect()
+
 
 async def test_transport_control():
     """Test transport control functions"""
@@ -72,6 +73,7 @@ async def test_transport_control():
 
     except Exception as e:
         logger.error(f"❌ Transport test error: {e}")
+
 
 async def test_track_management():
     """Test track management functions"""
@@ -106,6 +108,7 @@ async def test_track_management():
     except Exception as e:
         logger.error(f"❌ Track test error: {e}")
 
+
 async def test_project_info():
     """Test project information retrieval"""
     logger.info("📽️ Testing Project Info...")
@@ -123,6 +126,7 @@ async def test_project_info():
 
     except Exception as e:
         logger.error(f"❌ Project test error: {e}")
+
 
 async def main():
     """Run all development tests"""
@@ -143,6 +147,7 @@ async def main():
     logger.info("1. Make sure Reaper OSC is configured (see README)")
     logger.info("2. Test with: python server.py")
     logger.info("3. Add to Claude Desktop MCP configuration")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

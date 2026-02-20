@@ -1,0 +1,12 @@
+{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+        "name": "reaper_reascript",
+        "arguments": {
+            "operation": "api_help",
+            "function_name": "RPR_ShowConsoleMsg"
+        }
+    },
+    "id": 2
+}

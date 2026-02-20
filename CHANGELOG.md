@@ -5,19 +5,18 @@ All notable changes to **Reaper MCP Server** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.1.0] - Unreleased
 
 ### Added
-- **Multilevel help tool** (`get_help()`) with hierarchical tool documentation
-- **Comprehensive input validation** with user-friendly error messages
-- **Prompt templates** for audio production workflows and live performance control
-- **Structured logging** replacing all print statements
-- **Unit and integration testing** framework with pytest
-- **PowerShell test runner** script for Windows compatibility
-- **Modern Python packaging** with pyproject.toml
-- **GitHub Actions CI/CD** pipeline with comprehensive testing
-- **Issue and PR templates** for structured contributions
-- **Dependabot configuration** for automatic dependency updates
+- **ReaScript JSON Support**: `reaper_reascript` now returns structured JSON via `_result` variable
+- **Extensive Testing Scaffold**: Added `conftest.py` with mocks, unit tests, and E2E verification
+- **Webapp Launcher Tool**: `start_webapp` tool added to `reaper_system` for self-actuation
+- **Improved Status Page**: Enhanced documentation and monitoring in the SOTA dashboard
+
+### Technical Improvements
+- Refactored frontend communication to use robust JSON-RPC via `mcp_client`
+- Added `verify_e2e.py` for headless stdio verification
+- Fixed E402 and F841 linting issues across the codebase
 
 ### Changed
 - **Error handling** improved with validation and graceful degradation

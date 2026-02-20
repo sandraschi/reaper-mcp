@@ -80,40 +80,84 @@ def setup_tracks_portmanteau(mcp):
             if operation == "list":
                 track_count = await client.get_track_count()
                 if track_count == 0:
-                    return {"operation": "list", "tracks": [], "message": "No tracks found"}
+                    return {
+                        "operation": "list",
+                        "tracks": [],
+                        "message": "No tracks found",
+                    }
 
                 tracks = []
                 for tid in range(1, track_count + 1):
                     track_info = await client.get_track_info(tid)
                     tracks.append(track_info)
-                return {"operation": "list", "tracks": tracks, "count": track_count, "success": True}
+                return {
+                    "operation": "list",
+                    "tracks": tracks,
+                    "count": track_count,
+                    "success": True,
+                }
 
             elif operation == "info":
                 if track_id is None:
-                    return {"success": False, "error": "track_id required for info operation"}
+                    return {
+                        "success": False,
+                        "error": "track_id required for info operation",
+                    }
                 track_info = await client.get_track_info(track_id)
-                return {**track_info, "operation": "info", "track_id": track_id, "success": True}
+                return {
+                    **track_info,
+                    "operation": "info",
+                    "track_id": track_id,
+                    "success": True,
+                }
 
             elif operation == "mute":
                 if track_id is None:
-                    return {"success": False, "error": "track_id required for mute operation"}
+                    return {
+                        "success": False,
+                        "error": "track_id required for mute operation",
+                    }
                 result = await client.set_track_mute(track_id, value)
                 action = "🔇 Muted" if value else "🔊 Unmuted"
-                return {**result, "operation": "mute", "track_id": track_id, "muted": value, "message": f"{action} track {track_id}"}
+                return {
+                    **result,
+                    "operation": "mute",
+                    "track_id": track_id,
+                    "muted": value,
+                    "message": f"{action} track {track_id}",
+                }
 
             elif operation == "solo":
                 if track_id is None:
-                    return {"success": False, "error": "track_id required for solo operation"}
+                    return {
+                        "success": False,
+                        "error": "track_id required for solo operation",
+                    }
                 result = await client.set_track_solo(track_id, value)
                 action = "🎵 Soloed" if value else "🎼 Unsoloed"
-                return {**result, "operation": "solo", "track_id": track_id, "solo": value, "message": f"{action} track {track_id}"}
+                return {
+                    **result,
+                    "operation": "solo",
+                    "track_id": track_id,
+                    "solo": value,
+                    "message": f"{action} track {track_id}",
+                }
 
             elif operation == "arm":
                 if track_id is None:
-                    return {"success": False, "error": "track_id required for arm operation"}
+                    return {
+                        "success": False,
+                        "error": "track_id required for arm operation",
+                    }
                 result = await client.set_track_arm(track_id, value)
                 action = "🔴 Armed" if value else "⚪ Disarmed"
-                return {**result, "operation": "arm", "track_id": track_id, "armed": value, "message": f"{action} track {track_id}"}
+                return {
+                    **result,
+                    "operation": "arm",
+                    "track_id": track_id,
+                    "armed": value,
+                    "message": f"{action} track {track_id}",
+                }
 
             elif operation == "count":
                 count = await client.get_track_count()
@@ -121,9 +165,15 @@ def setup_tracks_portmanteau(mcp):
 
             elif operation == "bulk":
                 if not track_ids:
-                    return {"success": False, "error": "track_ids required for bulk operation"}
+                    return {
+                        "success": False,
+                        "error": "track_ids required for bulk operation",
+                    }
                 if bulk_operation not in ["mute", "solo", "arm"]:
-                    return {"success": False, "error": "bulk_operation must be 'mute', 'solo', or 'arm'"}
+                    return {
+                        "success": False,
+                        "error": "bulk_operation must be 'mute', 'solo', or 'arm'",
+                    }
 
                 results = []
                 for tid in track_ids:
@@ -133,7 +183,9 @@ def setup_tracks_portmanteau(mcp):
                         result = await client.set_track_solo(tid, value)
                     else:
                         result = await client.set_track_arm(tid, value)
-                    results.append({"track_id": tid, "success": result.get("success", False)})
+                    results.append(
+                        {"track_id": tid, "success": result.get("success", False)}
+                    )
 
                 successful = sum(1 for r in results if r["success"])
                 return {
@@ -149,4 +201,3 @@ def setup_tracks_portmanteau(mcp):
         except Exception as e:
             logger.error(f"Tracks {operation} error: {e}")
             return {"operation": operation, "success": False, "error": str(e)}
-

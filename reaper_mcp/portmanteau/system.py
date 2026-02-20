@@ -9,6 +9,7 @@ OPERATIONS:
 
 import logging
 from typing import Any
+from fastmcp import Context
 
 from ..osc_client import get_reaper_client, ensure_connected
 
@@ -53,10 +54,66 @@ def setup_system_portmanteau(mcp):
                 "valid_operations": valid_ops,
             }
 
+        if operation == "start_reaper":
+            import subprocess
+            import platform
+
+            system = platform.system()
+            reaper_path = None
+
+            if system == "Windows":
+                # Common paths
+                paths = [
+                    r"C:\Program Files\REAPER (x64)\reaper.exe",
+                    r"C:\Program Files\REAPER\reaper.exe",
+                    r"D:\REAPER\reaper.exe",  # User specific potential path
+                ]
+                for p in paths:
+                    import os
+
+                    if os.path.exists(p):
+                        reaper_path = p
+                        break
+            elif system == "Darwin":  # macOS
+                reaper_path = "/Applications/REAPER.app/Contents/MacOS/REAPER"
+
+            if reaper_path:
+                try:
+                    subprocess.Popen([reaper_path])
+                    return {
+                        "operation": "start_reaper",
+                        "success": True,
+                        "message": "Reaper started",
+                    }
+                except Exception as e:
+                    return {
+                        "operation": "start_reaper",
+                        "success": False,
+                        "error": str(e),
+                    }
+            else:
+                return {
+                    "operation": "start_reaper",
+                    "success": False,
+                    "error": "Reaper executable not found in standard locations.",
+                }
+
         if operation == "status":
             try:
                 if await ensure_connected():
                     client = await get_reaper_client()
+
+                    # Try to get extra info if reapy is available
+                    try:
+                        import reapy
+
+                        if reapy.is_inside_reaper():  # This check usually fails outside
+                            pass
+                    except ImportError:
+                        pass
+                    except Exception:
+                        pass
+
                     return {
                         "operation": "status",
                         "server": {
@@ -78,7 +135,11 @@ def setup_system_portmanteau(mcp):
                 else:
                     return {
                         "operation": "status",
-                        "server": {"name": "reaper-mcp", "version": "2.0.0", "status": "running"},
+                        "server": {
+                            "name": "reaper-mcp",
+                            "version": "2.0.0",
+                            "status": "running",
+                        },
                         "reaper_connection": {"connected": False},
                         "success": True,
                         "message": "Server running, Reaper not connected",
@@ -103,11 +164,26 @@ def setup_system_portmanteau(mcp):
             category_help = {
                 "transport": {
                     "tool": "reaper_transport",
-                    "operations": ["play", "stop", "pause", "record", "position", "status"],
+                    "operations": [
+                        "play",
+                        "stop",
+                        "pause",
+                        "record",
+                        "position",
+                        "status",
+                    ],
                 },
                 "tracks": {
                     "tool": "reaper_tracks",
-                    "operations": ["list", "info", "mute", "solo", "arm", "count", "bulk"],
+                    "operations": [
+                        "list",
+                        "info",
+                        "mute",
+                        "solo",
+                        "arm",
+                        "count",
+                        "bulk",
+                    ],
                 },
                 "project": {
                     "tool": "reaper_project",
@@ -121,7 +197,10 @@ def setup_system_portmanteau(mcp):
 
             if tool_name:
                 if tool_name in tool_help:
-                    help_data["tool_help"] = {"name": tool_name, "description": tool_help[tool_name]}
+                    help_data["tool_help"] = {
+                        "name": tool_name,
+                        "description": tool_help[tool_name],
+                    }
                 else:
                     help_data["error"] = f"Tool '{tool_name}' not found"
             elif category:
@@ -141,8 +220,23 @@ def setup_system_portmanteau(mcp):
                 "operation": "capabilities",
                 "total_tools": 4,
                 "tools": {
-                    "reaper_transport": ["play", "stop", "pause", "record", "position", "status"],
-                    "reaper_tracks": ["list", "info", "mute", "solo", "arm", "count", "bulk"],
+                    "reaper_transport": [
+                        "play",
+                        "stop",
+                        "pause",
+                        "record",
+                        "position",
+                        "status",
+                    ],
+                    "reaper_tracks": [
+                        "list",
+                        "info",
+                        "mute",
+                        "solo",
+                        "arm",
+                        "count",
+                        "bulk",
+                    ],
                     "reaper_project": ["info", "save", "marker", "render", "stats"],
                     "reaper_system": ["status", "help", "capabilities"],
                 },
@@ -151,3 +245,43 @@ def setup_system_portmanteau(mcp):
                 "success": True,
             }
 
+        return f"Unknown operation: {operation}"
+
+    @mcp.tool()
+    async def start_webapp(ctx: Context = None) -> str:
+        """
+        Launch the associated dashboard webapp for this MCP server.
+
+        Trigger:
+        - User asks to "open the dashboard" or "show me the interface"
+        - System setup verification
+
+        Returns:
+            Success message with URL
+        """
+        import subprocess
+        from pathlib import Path
+
+        # Locate web_sota relative to repo_root
+        # This file is in reaper_mcp/portmanteau/system.py
+        base_dir = Path(__file__).parent.parent.parent
+        webapp_dir = base_dir / "web_sota"
+        script_path = webapp_dir / "start.ps1"
+
+        if not script_path.exists():
+            return f"Error: Webapp start script not found at {script_path}"
+
+        try:
+            # Launch PowerShell script detached
+            # creationflags=0x00000010 is CREATE_NEW_CONSOLE
+            subprocess.Popen(
+                ["powershell", "-ExecutionPolicy", "Bypass", "-File", str(script_path)],
+                cwd=str(webapp_dir),
+                creationflags=0x00000010,
+                close_fds=True,
+            )
+
+            return "🎵 Webapp launching at http://localhost:10796. Check console for status."
+
+        except Exception as e:
+            return f"Failed to launch webapp: {str(e)}"

@@ -1,7 +1,7 @@
-'''MCP server entry point for Reaper-MCP.
+"""MCP server entry point for Reaper-MCP.
 
 This is the MCPB-compliant server wrapper that launches the Reaper-MCP server.
-'''
+"""
 
 import sys
 from pathlib import Path
@@ -11,8 +11,7 @@ parent_dir = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(parent_dir))
 
 # Import and run main server
-from server import main
+from server import main  # noqa: E402
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-

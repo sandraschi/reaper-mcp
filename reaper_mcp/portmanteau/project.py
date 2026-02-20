@@ -109,12 +109,17 @@ def setup_project_portmanteau(mcp):
                 return {
                     **result,
                     "operation": "save",
-                    "message": "💾 Project saved" if result.get("success") else "❌ Save failed",
+                    "message": "💾 Project saved"
+                    if result.get("success")
+                    else "❌ Save failed",
                 }
 
             elif operation == "marker":
                 if not position or not name:
-                    return {"success": False, "error": "position and name required for marker operation"}
+                    return {
+                        "success": False,
+                        "error": "position and name required for marker operation",
+                    }
                 position_seconds = _parse_time_to_seconds(position)
                 result = await client.add_marker(position_seconds, name)
                 return {
@@ -143,7 +148,11 @@ def setup_project_portmanteau(mcp):
                 project_info = await client.get_project_info()
                 track_count = await client.get_track_count()
                 position_info = await client.get_position()
-                position = position_info.get("args", ["0:00:00"])[0] if position_info.get("args") else "0:00:00"
+                position = (
+                    position_info.get("args", ["0:00:00"])[0]
+                    if position_info.get("args")
+                    else "0:00:00"
+                )
 
                 return {
                     "operation": "stats",
@@ -161,4 +170,3 @@ def setup_project_portmanteau(mcp):
         except Exception as e:
             logger.error(f"Project {operation} error: {e}")
             return {"operation": operation, "success": False, "error": str(e)}
-

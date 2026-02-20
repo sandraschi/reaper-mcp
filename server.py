@@ -31,30 +31,24 @@ mcp = FastMCP(
 )
 
 
-def main():
-    """Initialize and start the Reaper MCP server."""
-
+def create_server() -> FastMCP:
+    """Factory function to create and configure the server instance."""
     if TOOL_MODE == "portmanteau":
-        # Import and register portmanteau tools (4 consolidated tools)
         from reaper_mcp.portmanteau import setup_all_portmanteau_tools
 
         setup_all_portmanteau_tools(mcp)
-        logger.info("🎛️ Registered 4 portmanteau tools (consolidated from 21)")
     else:
-        # Legacy: individual tools
-        from reaper_mcp.transport import register_transport_tools
         from reaper_mcp.tracks import register_track_tools
         from reaper_mcp.project import register_project_tools
 
-        register_transport_tools(mcp)
         register_track_tools(mcp)
         register_project_tools(mcp)
-        logger.info("🎛️ Registered 21 individual tools (legacy mode)")
+        from reaper_mcp.reascript import register_reascript_tools
 
-    # Register resources
+        register_reascript_tools(mcp)
+
     @mcp.resource("reaper://config")
     def reaper_config() -> str:
-        """Reaper OSC configuration information."""
         import json
 
         return json.dumps(
@@ -69,6 +63,14 @@ def main():
                 ],
             }
         )
+
+    return mcp
+
+
+def main():
+    """Initialize and start the Reaper MCP server."""
+
+    create_server()
 
     logger.info("🎵 Starting Reaper MCP Server v2.0.0")
     logger.info("🇦🇹 Austrian Audio Automation - FastMCP 2.13.1")
