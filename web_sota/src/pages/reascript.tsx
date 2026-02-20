@@ -14,6 +14,16 @@ interface Snippet {
     code: string;
 }
 
+interface McpContentItem {
+    type: string;
+    text: string;
+}
+
+interface McpResponse {
+    content?: McpContentItem[];
+    [key: string]: unknown;
+}
+
 const EXAMPLES: Snippet[] = [
     {
         name: "Console Hello World",
@@ -60,7 +70,7 @@ for track in project.tracks:
 
 export function Reascript() {
     const [code, setCode] = useState<string>(EXAMPLES[0].code);
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<McpResponse | null>(null);
     const [loading, setLoading] = useState(false);
     // const [customSnippets, setCustomSnippets] = useState<Snippet[]>([]); // TODO: Implement custom snippets
 
@@ -74,14 +84,14 @@ export function Reascript() {
             });
 
             // Try to parse content as JSON if it looks like it
-            let contentText = data.content?.[0]?.text || '';
+            const contentText = data.content?.[0]?.text || '';
             let displayContent = contentText;
 
             try {
                 // If the response is a JSON string, prettify it
                 const parsed = JSON.parse(contentText);
                 displayContent = JSON.stringify(parsed, null, 2);
-            } catch (e) {
+            } catch {
                 // Not JSON, keep as is
             }
 
@@ -213,7 +223,7 @@ export function Reascript() {
                                     {result ? (
                                         <div className="space-y-2 font-mono text-sm">
                                             {result.content && Array.isArray(result.content) ? (
-                                                result.content.map((item: any, i: number) => (
+                                                result.content.map((item: McpContentItem, i: number) => (
                                                     <div key={i} className={cn(
                                                         "whitespace-pre-wrap break-all",
                                                         item.type === 'text' ? "text-slate-300" : "text-amber-400"
