@@ -34,14 +34,28 @@ Set `REAPER_TOOL_MODE` environment variable:
 - **Python 3.10+**
 - **OSC enabled** in Reaper
 
-### Installation
+## 🚀 Installation
 
-```powershell
-cd D:\Dev\repos\reaper-mcp
-pip install -r requirements.txt
-pip install -e .
+### Prerequisites
+- [uv](https://docs.astral.sh/uv/) installed (RECOMMENDED)
+- Python 3.12+
+
+### 📦 Quick Start
+Run immediately via `uvx`:
+```bash
+uvx reaper-mcp
 ```
 
+### 🎯 Claude Desktop Integration
+Add to your `claude_desktop_config.json`:
+```json
+"mcpServers": {
+  "reaper-mcp": {
+    "command": "uv",
+    "args": ["--directory", "D:/Dev/repos/reaper-mcp", "run", "reaper-mcp"]
+  }
+}
+```
 ### Reaper OSC Setup 🎛️
 
 1. Open **Reaper preferences** (Ctrl+P)
@@ -209,3 +223,15 @@ This project includes an extensive testing scaffold for both local development a
 ---
 
 **Built with Austrian precision for professional DAW automation! 🎵🇦🇹**
+
+
+## 🌐 Webapp Dashboard
+
+This MCP server includes a free, premium web interface for monitoring and control.
+By default, the web dashboard runs on port **10796**.
+*(Assigned ports: **10796** (Web dashboard frontend), **10797** (Web dashboard backend))*
+
+To start the webapp:
+1. Navigate to the `webapp` (or `web`, `frontend`) directory.
+2. Run `start.bat` (Windows) or `./start.ps1` (PowerShell).
+3. Open `http://localhost:10796` in your browser.
