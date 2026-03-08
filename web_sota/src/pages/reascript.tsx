@@ -82,20 +82,12 @@ export function Reascript() {
                 operation: 'run',
                 code
             });
-
-            // Try to parse content as JSON if it looks like it
-            const contentText = data.content?.[0]?.text || '';
-            let displayContent = contentText;
-
-            try {
-                // If the response is a JSON string, prettify it
-                const parsed = JSON.parse(contentText);
-                displayContent = JSON.stringify(parsed, null, 2);
-            } catch {
-                // Not JSON, keep as is
-            }
-
-            setResult({ ...data, content: [{ type: 'text', text: displayContent }] });
+            const raw = data.result;
+            const displayContent =
+                typeof raw === 'string'
+                    ? raw
+                    : JSON.stringify(raw ?? data.message ?? '', null, 2);
+            setResult({ content: [{ type: 'text', text: displayContent }] });
         } catch (error) {
             setResult({ content: [{ type: 'text', text: String(error) }] });
         } finally {
@@ -107,11 +99,11 @@ export function Reascript() {
         setLoading(true);
         setResult(null);
         try {
-            const data = await callMcpTool('reaper_reascript', {
-                operation: 'setup'
-            });
-
-            setResult({ content: [{ type: 'text', text: data.content?.[0]?.text || 'Reapy setup initiated.' }] });
+            const data = await callMcpTool('reaper_reascript', { operation: 'setup' });
+            const text =
+                (typeof data.result === 'string' ? data.result : data.message) ||
+                'Reapy setup initiated.';
+            setResult({ content: [{ type: 'text', text }] });
         } catch (error) {
             console.error('Error setting up reapy:', error);
             setResult({ content: [{ type: 'text', text: 'Failed to setup reapy. Is the MCP server running?' }] });

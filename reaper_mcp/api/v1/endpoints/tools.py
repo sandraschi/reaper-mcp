@@ -1,114 +1,101 @@
-"""Universal Tool API for ReaperMCP.
-
-Exposes FastMCP tools through a standardized REST interface.
-"""
+"""Universal Tool API for ReaperMCP (FastMCP 3.1)."""
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
-# We'll import the mcp instance in main.py to avoid circular imports
-# For now we use a placeholder or dependency injection if needed
-# But for simplicity in this architecture, we import from server
-from server import mcp
+from reaper_mcp.mcp_app import mcp
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(tags=["tools"], prefix="/v1/tools")
+router = APIRouter(tags=["tools"], prefix="/tools")
 
 
 class ToolParameter(BaseModel):
     name: str
     type: str
-    description: Optional[str] = None
+    description: str | None = None
     required: bool = True
 
 
 class ToolInfo(BaseModel):
     name: str
     description: str
-    parameters: List[ToolParameter] = []
+    parameters: list[ToolParameter] = []
 
 
 class ToolCallRequest(BaseModel):
     name: str
-    arguments: Dict[str, Any] = {}
+    arguments: dict[str, Any] = {}
 
 
 class ToolCallResponse(BaseModel):
     status: str
     result: Any = None
-    message: Optional[str] = None
+    message: str | None = None
 
 
-@router.get("/", response_model=List[ToolInfo])
-async def list_tools() -> List[ToolInfo]:
-    """List all registered MCP tools."""
+@router.get("/", response_model=list[ToolInfo])
+async def list_tools() -> list[ToolInfo]:
+    """List all registered MCP tools (FastMCP 3.1 list_tools)."""
     try:
-        tools: List[ToolInfo] = []
-
-        # FastMCP 2.13.1 tool manager access
-        tool_sources = []
-        if hasattr(mcp, "_tool_manager") and hasattr(mcp._tool_manager, "tools"):
-            tool_sources = list(mcp._tool_manager.tools.values())
-        elif hasattr(mcp, "_tools"):
-            tool_sources = list(mcp._tools.values())
-
-        for tool in tool_sources:
-            params = []
-            if hasattr(tool, "parameters") and tool.parameters:
-                schema = tool.parameters.get("properties", {})
-                required_list = tool.parameters.get("required", [])
-
-                for p_name, p_info in schema.items():
-                    params.append(
-                        ToolParameter(
-                            name=p_name,
-                            type=p_info.get("type", "any"),
-                            description=p_info.get("description"),
-                            required=p_name in required_list,
-                        )
+        # FastMCP 3.1: list_tools() returns list of tool objects
+        raw = await mcp.list_tools()
+        tools_out: list[ToolInfo] = []
+        for t in raw:
+            params: list[ToolParameter] = []
+            schema = getattr(t, "parameters", None) or {}
+            props = schema.get("properties", {})
+            required_list = schema.get("required", [])
+            for p_name, p_info in props.items():
+                params.append(
+                    ToolParameter(
+                        name=p_name,
+                        type=p_info.get("type", "string"),
+                        description=p_info.get("description"),
+                        required=p_name in required_list,
                     )
-
-            tools.append(
+                )
+            tools_out.append(
                 ToolInfo(
-                    name=tool.name,
-                    description=tool.description or "",
+                    name=t.name,
+                    description=getattr(t, "description", None) or "",
                     parameters=params,
                 )
             )
-
-        return tools
-
+        return tools_out
     except Exception as e:
-        logger.error(f"Error listing tools: {str(e)}", exc_info=True)
+        logger.exception("Error listing tools")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error listing tools: {str(e)}",
-        )
+        ) from e
 
 
 @router.post("/call", response_model=ToolCallResponse)
 async def call_tool(request: ToolCallRequest) -> ToolCallResponse:
-    """Execute a registered MCP tool."""
+    """Execute a registered MCP tool. Uses MCP protocol path when available."""
     try:
-        logger.info(
-            f"Calling tool via API: {request.name} with args: {request.arguments}"
-        )
-
-        # Execute tool via FastMCP instance
-        result = await mcp.call_tool(request.name, request.arguments)
-
+        logger.info("Calling tool via API: %s with args: %s", request.name, request.arguments)
+        # FastMCP 3.1: use run_tool if available, else fallback
+        if hasattr(mcp, "run_tool"):
+            result = await mcp.run_tool(request.name, request.arguments)
+        elif hasattr(mcp, "call_tool"):
+            result = await mcp.call_tool(request.name, request.arguments)
+        else:
+            return ToolCallResponse(
+                status="error",
+                message="Tool execution not available via REST; use MCP client at /mcp",
+            )
         return ToolCallResponse(
             status="success",
             result=result,
             message=f"Tool {request.name} executed successfully",
         )
-
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
     except Exception as e:
-        logger.error(f"Error calling tool {request.name}: {str(e)}", exc_info=True)
+        logger.exception("Error calling tool %s", request.name)
         return ToolCallResponse(status="error", message=str(e))

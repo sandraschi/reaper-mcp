@@ -16,26 +16,9 @@ export function Status() {
         setLoading(true);
         setError(null);
         try {
-            const result = await callMcpTool('reaper_system', { operation: 'status' });
-            // Parse result if it's a string (ReaScript tools usually return text/json string) 
-            // BUT system tool returns a dict in python. 
-            // FastMCP might serialize it to content list.
-
-            // Standard MCP response format from callMcpTool is the 'result' object. 
-            // For complex Python types, FastMCP usually dumps them as JSON in content[0].text
-            // Let's inspect content.
-            if (result.content && result.content[0]?.text) {
-                try {
-                    const parsed = JSON.parse(result.content[0].text);
-                    setStatus(parsed);
-                } catch {
-                    // If not JSON, maybe it's just text
-                    setStatus({ message: result.content[0].text });
-                }
-            } else {
-                setStatus(result);
-            }
-
+            const data = await callMcpTool('reaper_system', { operation: 'status' });
+            // REST response: { status, result?, message? }; tool output is in result
+            setStatus(data.result ?? { message: data.message });
         } catch (err) {
             setError(String(err));
         } finally {
@@ -96,7 +79,7 @@ export function Status() {
                         </div>
                         <div className="flex items-center justify-between">
                             <span className="text-sm font-medium">Port</span>
-                            <span className="text-sm text-muted-foreground">10793 (SSE/JSON-RPC)</span>
+                            <span className="text-sm text-muted-foreground">10797 (REST + MCP /mcp)</span>
                         </div>
                         {error && (
                             <div className="p-3 text-sm text-red-400 bg-red-950/20 rounded border border-red-900/50">

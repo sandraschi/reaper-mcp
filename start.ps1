@@ -1,40 +1,29 @@
-$ErrorActionPreference = "Stop"
+# Webapp Start - Standardized SOTA (Auto-Repaired V2.5)
+$WebPort = 10796
+$BackendPort = 10797
+$ProjectRoot = Split-Path -Parent $PSScriptRoot
 
-# Configuration
-$port = 10793
-$frontendPort = 10796 # Assuming frontend runs here based on walkthrough
-$backendCmd = "fastmcp run server.py --transport sse --port $port"
-
-Write-Host "🎵 Starting Reaper MCP (SOTA Setup)..." -ForegroundColor Cyan
-
-# 1. Kill any existing processes on ports
-function Kill-Port($p) {
-    $tcp = Get-NetTCPConnection -LocalPort $p -ErrorAction SilentlyContinue
-    if ($tcp) {
-        Write-Host "Killing process on port $p..." -ForegroundColor Yellow
-        Stop-Process -Id $tcp.OwningProcess -Force -ErrorAction SilentlyContinue
-    }
+# 1. Kill any process squatting on the ports
+Write-Host "Checking for port squatters on $WebPort and $BackendPort..." -ForegroundColor Yellow
+$pids = Get-NetTCPConnection -LocalPort $WebPort, $BackendPort -ErrorAction SilentlyContinue | Where-Object { $_.OwningProcess -gt 4 } | Select-Object -ExpandProperty OwningProcess -Unique
+foreach ($p in $pids) {
+    Write-Host "Found squatter (PID: $p). Terminating..." -ForegroundColor Red
+    try { Stop-Process -Id $p -Force -ErrorAction Stop } catch { Write-Host "Warning: Could not terminate PID $p." -ForegroundColor Gray }
 }
 
-Kill-Port $port
-Kill-Port $frontendPort
+# 2. Setup
+Set-Location $PSScriptRoot
+if (-not (Test-Path "node_modules")) { npm install }
 
-# 2. Start Backend
-Write-Host "Starting Backend on port $port..." -ForegroundColor Green
-$backendProcess = Start-Process -FilePath "uv" -ArgumentList "run", "fastmcp", "run", "server.py", "--transport", "sse", "--port", "$port" -PassThru -NoNewWindow
+# 3. Start the Python backend (Background)
+Write-Host "Starting Python backend on port $BackendPort ..." -ForegroundColor Cyan
 
-# 3. Start Frontend
-Write-Host "Starting Frontend..." -ForegroundColor Green
-Set-Location "web_sota"
-# We use 'cmd /c' to run npm so it doesn't block properly or opens in new window if needed, 
-# but here we want it to run in parallel. 
-# Actually, 'npm run dev' usually runs interactively. 
-# Let's run it in a new window for the user to see logs.
-Start-Process -FilePath "cmd" -ArgumentList "/c npm run dev -- --port $frontendPort"
+# Use TRIPLE backtick to ensure $env:PYTHONPATH reaches the REAL shell
+$backendCmd = "`$env:PYTHONPATH = '$PSScriptRoot;$PSScriptRoot\src'; Set-Location '$PSScriptRoot'; uv run uvicorn reaper_mcp.server:app --host 127.0.0.1 --port $BackendPort --log-level info"
 
-# Wait for backend a bit
-Start-Sleep -Seconds 5
+Start-Process powershell -ArgumentList "-NoExit", "-Command", $backendCmd -WindowStyle Normal
 
-Write-Host "✅ SOTA Stack Running!" -ForegroundColor Green
-Write-Host "Backend: http://localhost:$port"
-Write-Host "Frontend: http://localhost:$frontendPort"
+# 4. Run server (Vite dev)
+Write-Host "Starting Vite frontend on port $WebPort ..." -ForegroundColor Green
+npm run dev -- --port $WebPort --host
+

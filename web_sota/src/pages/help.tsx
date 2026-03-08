@@ -14,17 +14,11 @@ export function Help() {
         const fetchHelp = async () => {
             setLoading(true);
             try {
-                const result = await callMcpTool('reaper_system', { operation: 'help' });
-                // Parse if needed
-                if (result.content && result.content[0]?.text) {
-                    try {
-                        setServerHelp(JSON.parse(result.content[0].text));
-                    } catch {
-                        setServerHelp(result.content[0].text);
-                    }
-                } else {
-                    setServerHelp(result);
-                }
+                const data = await callMcpTool('reaper_system', { operation: 'help' });
+                const raw = data.result;
+                setServerHelp(
+                    typeof raw === 'object' && raw !== null ? raw : { text: raw ?? data.message }
+                );
             } catch (err) {
                 console.error("Failed to fetch server help", err);
             } finally {

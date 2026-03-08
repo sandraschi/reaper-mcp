@@ -2,12 +2,13 @@
 ReaScript Portmanteau Tool
 """
 
-from typing import Optional, Literal
-from fastmcp import FastMCP, Context
+from typing import Literal
+
+from fastmcp import FastMCP
 
 try:
     import reapy
-    import reapy.reascript_api as RPR
+    import reapy.reascript_api as RPR  # noqa: N812 (RPR is ReaScript convention)
 
     REAPY_AVAILABLE = True
 except ImportError:
@@ -20,9 +21,8 @@ def setup_reascript_portmanteau(mcp: FastMCP):
     @mcp.tool()
     def reaper_reascript(
         operation: Literal["run", "setup", "api_help"],
-        code: Optional[str] = None,
-        function_name: Optional[str] = None,
-        ctx: Context = None,
+        code: str | None = None,
+        function_name: str | None = None,
     ) -> str:
         """
         Unified ReaScript operations for Reaper DAW.
@@ -43,9 +43,7 @@ def setup_reascript_portmanteau(mcp: FastMCP):
         if operation == "setup":
             try:
                 reapy.configure_reaper()
-                return (
-                    "Reaper configuration initiated. Restart Reaper to apply changes."
-                )
+                return "Reaper configuration initiated. Restart Reaper to apply changes."
             except Exception as e:
                 return f"Error configuring reapy: {e}"
 
@@ -56,12 +54,10 @@ def setup_reascript_portmanteau(mcp: FastMCP):
                 # Execute
                 local_scope = {"reapy": reapy}
                 # Inject RPR functions
-                local_scope.update(
-                    {k: v for k, v in RPR.__dict__.items() if k.startswith("RPR_")}
-                )
+                local_scope.update({k: v for k, v in RPR.__dict__.items() if k.startswith("RPR_")})
                 local_scope["RPR"] = RPR
 
-                exec(code, local_scope)
+                exec(code, local_scope)  # noqa: S102 (intentional ReaScript execution)
 
                 # Check for structured result
                 if "_result" in local_scope:
@@ -78,9 +74,7 @@ def setup_reascript_portmanteau(mcp: FastMCP):
 
         elif operation == "api_help":
             if not function_name:
-                return (
-                    "Error: 'function_name' argument required for 'api_help' operation."
-                )
+                return "Error: 'function_name' argument required for 'api_help' operation."
 
             target = function_name
             if not target.startswith("RPR_") and hasattr(RPR, "RPR_" + target):

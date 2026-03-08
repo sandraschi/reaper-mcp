@@ -1,17 +1,20 @@
-# Reaper MCP Server 🎵
+# Reaper MCP Server
 
-[![FastMCP](https://img.shields.io/badge/FastMCP-2.13.1-blue.svg)](https://gofastmcp.com)
-[![Portmanteau](https://img.shields.io/badge/Tools-4%20Portmanteau-purple.svg)](#-portmanteau-tools)
+[![FastMCP](https://img.shields.io/badge/FastMCP-3.1-blue.svg)](https://gofastmcp.com)
+[![Portmanteau](https://img.shields.io/badge/Tools-5%20Portmanteau-purple.svg)](#-portmanteau-tools)
 
 **Austrian precision DAW automation via Reaper with OSC control.**
 
-## ✨ What's New (v2.0)
+## What's New (FastMCP 3.1)
 
-- **FastMCP 2.13.1** - Latest MCP framework
-- **Portmanteau Tools** - 21 tools consolidated into 4 clean interfaces (81% reduction!)
-- **Streamlined CI/CD** - Single workflow, ruff linting
+- **FastMCP 3.1** - Full alignment: tools, prompts, skills, sampling-ready
+- **Portmanteau tools** - 5 consolidated interfaces (transport, tracks, project, system, reascript)
+- **Prompts** - Session templates: record, mix, export, transport, tracks, project, system help
+- **Skills** - Optional skills provider exposes `reaper_mcp/skills` as MCP resources (`skill://`)
+- **Agentic workflows** - Chain tools; use sampling so the model can orchestrate record/edit/export in one flow
+- **HTTP + stdio** - Web backend mounts MCP at `/mcp` (streamable HTTP); CLI runs stdio for Claude Desktop
 
-## 🎛️ Portmanteau Tools
+## Portmanteau Tools
 
 | Tool | Operations | Description |
 |------|------------|-------------|
@@ -19,12 +22,7 @@
 | `reaper_tracks` | list, info, mute, solo, arm, count, bulk | Track management |
 | `reaper_project` | info, save, marker, render, stats | Project operations |
 | `reaper_system` | status, help, capabilities | System status |
-
-### Tool Mode
-
-Set `REAPER_TOOL_MODE` environment variable:
-- `portmanteau` (default) - 4 consolidated tools
-- `individual` - 21 individual tools (backward compatibility)
+| `reaper_reascript` | run, setup, api_help | ReaScript execution and API help |
 
 ## 🚀 Quick Start
 
@@ -152,10 +150,10 @@ reaper_system("capabilities")
                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                      Reaper MCP Server                          │
-│                       (FastMCP 2.13.1)                          │
+│                        (FastMCP 3.1)                           │
 │  ┌──────────────────────────────────────────────────────────┐   │
-│  │              4 Portmanteau Tools                          │   │
-│  │  reaper_transport │ reaper_tracks │ reaper_project │ ...  │   │
+│  │  Portmanteau Tools + Prompts + Skills (optional)          │   │
+│  │  transport │ tracks │ project │ system │ reascript        │   │
 │  └──────────────────────────┬───────────────────────────────┘   │
 │                             ▼                                    │
 │              ┌─────────────────────┐                            │
@@ -214,24 +212,24 @@ This project includes an extensive testing scaffold for both local development a
 1. Enable "Send all feedback" in Reaper OSC settings
 2. Verify Local listen port matches (8000)
 
-## 🇦🇹 Austrian Efficiency
+## Sampling and agentic workflows
 
-- **4 tools** instead of 21 (81% reduction!)
-- **Practical solutions** over theoretical complexity
-- **No decision paralysis** - exactly what you need
+- **Sampling**: Clients that support MCP sampling can let the server request LLM completions during tool runs; Reaper MCP is sampling-ready (dialogic returns, tool chaining).
+- **Agentic**: Chain tools (e.g. `reaper_system status` -> `reaper_transport play` -> `reaper_tracks list`). Use registered prompts for session templates (record, mix, export).
+
+## Austrian efficiency
+
+- **5 portmanteau tools** instead of 21 individual tools
+- **Prompts** for session templates; **skills** for workflow resources
+- **FastMCP 3.1** - single stdio or HTTP transport, no 2.x patterns
 
 ---
 
-**Built with Austrian precision for professional DAW automation! 🎵🇦🇹**
+**Built with Austrian precision for professional DAW automation.**
 
 
-## 🌐 Webapp Dashboard
+## Web dashboard (web_sota)
 
-This MCP server includes a free, premium web interface for monitoring and control.
-By default, the web dashboard runs on port **10796**.
-*(Assigned ports: **10796** (Web dashboard frontend), **10797** (Web dashboard backend))*
+Web interface for monitoring and control. Ports: **10796** (frontend), **10797** (backend). MCP streamable HTTP at **http://localhost:10797/mcp**.
 
-To start the webapp:
-1. Navigate to the `webapp` (or `web`, `frontend`) directory.
-2. Run `start.bat` (Windows) or `./start.ps1` (PowerShell).
-3. Open `http://localhost:10796` in your browser.
+To start: from repo root run `web_sota\start.ps1` (PowerShell), then open `http://localhost:10796`.

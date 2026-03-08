@@ -48,7 +48,7 @@ export function Tools() {
             const data = await callMcpTool(selectedTool.name, args);
             setResult(data);
         } catch (error) {
-            setResult({ status: 'error', message: String(error) });
+            setResult({ status: "error", message: String(error) });
         } finally {
             setLoading(false);
         }

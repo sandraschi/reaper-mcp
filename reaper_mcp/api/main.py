@@ -1,23 +1,23 @@
-"""Main entry point for Reaper-MCP FastAPI server."""
+"""Main entry point for Reaper-MCP FastAPI server (FastMCP 3.1)."""
 
-import uvicorn
 import os
 import sys
 
-# Add current directory to sys.path to allow importing from server.py in root
-sys.path.append(os.getcwd())
+if os.getcwd() not in sys.path:
+    sys.path.insert(0, os.getcwd())
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from reaper_mcp.api import api_router
+from reaper_mcp.mcp_app import mcp
 
 app = FastAPI(
     title="Reaper-MCP API",
-    description="REST interface for Reaper-MCP tools",
+    description="REST interface for Reaper-MCP tools (FastMCP 3.1)",
     version="1.0.0",
 )
 
-# Enable CORS for the webapp
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,6 +28,9 @@ app.add_middleware(
 
 app.include_router(api_router)
 
+# Mount FastMCP 3.1 HTTP transport at /mcp (streamable HTTP)
+app.mount("/mcp", mcp.http_app())
+
 
 @app.get("/health")
 async def health():
@@ -35,4 +38,6 @@ async def health():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=10793)
+    import uvicorn
+
+    uvicorn.run(app, host="127.0.0.1", port=10793)

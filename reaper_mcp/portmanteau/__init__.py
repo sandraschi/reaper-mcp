@@ -1,10 +1,10 @@
 """
 Reaper-MCP Portmanteau Tools
 
-Consolidates 21 individual tools into 4 unified portmanteau interfaces.
-Follows FastMCP 2.13+ best practices for feature-rich MCP servers.
+Consolidates 21 individual tools into 5 unified portmanteau interfaces.
+FastMCP 3.1 compliant; supports agentic workflows and dialogic returns.
 
-PORTMANTEAU TOOLS (4 total):
+PORTMANTEAU TOOLS (5 total):
 1. reaper_transport - Play/stop/pause/record/position/status
 2. reaper_tracks - Get/info/mute/solo/arm/bulk operations
 3. reaper_project - Info/save/markers/render/stats
@@ -12,17 +12,17 @@ PORTMANTEAU TOOLS (4 total):
 5. reaper_reascript - Run/Setup/Docs for Python ReaScript
 
 BENEFITS:
-- 21 tools → 4 tools (81% reduction)
+- 21 tools → 5 tools (portmanteau reduction)
 - Better UX with grouped operations
 - Easier discovery by category
 - AI-friendly comprehensive docstrings
 """
 
-from .transport import setup_transport_portmanteau
-from .tracks import setup_tracks_portmanteau
 from .project import setup_project_portmanteau
-from .system import setup_system_portmanteau
 from .reascript import setup_reascript_portmanteau
+from .system import setup_system_portmanteau
+from .tracks import setup_tracks_portmanteau
+from .transport import setup_transport_portmanteau
 
 
 def setup_all_portmanteau_tools(mcp):
