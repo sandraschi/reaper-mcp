@@ -5,6 +5,28 @@ All notable changes to **Reaper MCP Server** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-03-08
+
+### Added
+- **FastMCP 3.1**: Full alignment; `fastmcp>=3.1`, single-backend pattern (REST + MCP at `/mcp`).
+- **Prompts**: Seven session templates (`reaper_record_session`, `reaper_mix_session`, `reaper_export_project`, `reaper_transport_control`, `reaper_track_operations`, `reaper_project_help`, `reaper_system_help`).
+- **Skills**: Optional `SkillsDirectoryProvider` for `reaper_mcp/skills`; bundled `reaper-daw-workflow` SKILL.
+- **Server module**: `reaper_mcp/server.py` for ASGI (`uvicorn reaper_mcp.server:app`) and stdio (`mcp.run()`); `reaper_mcp/mcp_app.py` single MCP instance with portmanteau tools and prompts.
+- **FastAPI mount**: Backend mounts MCP at `/mcp` via `mcp.http_app()`; REST at `/api/v1/tools` (list/call).
+
+### Changed
+- **Webapp**: Frontend uses REST (GET/POST `/api/v1/tools`) on port 10797; removed JSON-RPC `/messages`. `mcp_client.ts` uses `VITE_BACKEND_URL` (default localhost:10797). Status, Help, ReaScript, Tools pages use REST response shape `{ status, result?, message? }`.
+- **Backend**: Tools router prefix `/tools` under `/api/v1` (full path `/api/v1/tools`). Start script runs backend from project root with `uv run --project $ProjectRoot`.
+- **Stdio**: `python -m reaper_mcp` / `reaper-mcp` CLI runs MCP stdio server (`mcp.run()`); web backend via `uvicorn reaper_mcp.server:app`.
+- **ReaScript**: Removed unused `Context` parameter from `reaper_reascript`; ruff/format fixes (B904, N812, S102, S104).
+
+### Fixed
+- **ASGI load**: Resolve "Could not import module reaper_mcp.server" by adding `server.py` and running backend from project root.
+- **Dependencies**: Added `fastapi`, `uvicorn[standard]` to `pyproject.toml`.
+
+### Documentation
+- **README**: FastMCP 3.1, five portmanteau tools, prompts/skills/agentic, sampling note, web_sota ports 10796/10797 and `/mcp`. Architecture blurb updated.
+
 ## [2.1.0] - Unreleased
 
 ### Added
