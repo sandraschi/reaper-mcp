@@ -10,6 +10,7 @@ PORTMANTEAU TOOLS (5 total):
 3. reaper_project - Info/save/markers/render/stats
 4. reaper_system - Status/help/capabilities
 5. reaper_reascript - Run/Setup/Docs for Python ReaScript
+6. reaper_orchestrator - Stem import, FX chain, regions, end-to-end pipeline
 
 BENEFITS:
 - 21 tools → 5 tools (portmanteau reduction)
@@ -18,6 +19,7 @@ BENEFITS:
 - AI-friendly comprehensive docstrings
 """
 
+from .orchestrator import setup_orchestrator_portmanteau
 from .project import setup_project_portmanteau
 from .reascript import setup_reascript_portmanteau
 from .system import setup_system_portmanteau
@@ -32,6 +34,7 @@ def setup_all_portmanteau_tools(mcp):
     setup_project_portmanteau(mcp)
     setup_system_portmanteau(mcp)
     setup_reascript_portmanteau(mcp)
+    setup_orchestrator_portmanteau(mcp)
 
 
 __all__ = [
@@ -41,4 +44,5 @@ __all__ = [
     "setup_project_portmanteau",
     "setup_system_portmanteau",
     "setup_reascript_portmanteau",
+    "setup_orchestrator_portmanteau",
 ]

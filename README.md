@@ -1,14 +1,14 @@
 # Reaper MCP Server
 
 [![FastMCP](https://img.shields.io/badge/FastMCP-3.1-blue.svg)](https://gofastmcp.com)
-[![Portmanteau](https://img.shields.io/badge/Tools-5%20Portmanteau-purple.svg)](#-portmanteau-tools)
+[![Portmanteau](https://img.shields.io/badge/Tools-6%20Portmanteau-purple.svg)](#-portmanteau-tools)
 
 **Austrian precision DAW automation via Reaper with OSC control.**
 
 ## What's New (FastMCP 3.1)
 
 - **FastMCP 3.1** - Full alignment: tools, prompts, skills, sampling-ready
-- **Portmanteau tools** - 5 consolidated interfaces (transport, tracks, project, system, reascript)
+- **Portmanteau tools** - 6 consolidated interfaces (transport, tracks, project, system, reascript, orchestrator)
 - **Prompts** - Session templates: record, mix, export, transport, tracks, project, system help
 - **Skills** - Optional skills provider exposes `reaper_mcp/skills` as MCP resources (`skill://`)
 - **Agentic workflows** - Chain tools; use sampling so the model can orchestrate record/edit/export in one flow
@@ -23,8 +23,9 @@
 | `reaper_project` | info, save, marker, render, stats | Project operations |
 | `reaper_system` | status, help, capabilities | System status |
 | `reaper_reascript` | run, setup, api_help | ReaScript execution and API help |
+| `reaper_orchestrator` | stem_import, fx_chain, regions, full_pipeline | SG2-to-mix workflow automation |
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 
@@ -32,19 +33,19 @@
 - **Python 3.10+**
 - **OSC enabled** in Reaper
 
-## 🚀 Installation
+##  Installation
 
 ### Prerequisites
 - [uv](https://docs.astral.sh/uv/) installed (RECOMMENDED)
 - Python 3.12+
 
-### 📦 Quick Start
+###  Quick Start
 Run immediately via `uvx`:
 ```bash
 uvx reaper-mcp
 ```
 
-### 🎯 Claude Desktop Integration
+###  Claude Desktop Integration
 Add to your `claude_desktop_config.json`:
 ```json
 "mcpServers": {
@@ -54,16 +55,16 @@ Add to your `claude_desktop_config.json`:
   }
 }
 ```
-### Reaper OSC Setup 🎛️
+### Reaper OSC Setup 
 
 1. Open **Reaper preferences** (Ctrl+P)
 2. Go to **Control/OSC/web**
-3. Click **Add** → new OSC device
+3. Click **Add**  new OSC device
 4. Configure:
    - **Local IP**: `127.0.0.1`
    - **Local listen port**: `8000`
    - **Remote port**: `8001`
-   - ✅ Enable **"Send all feedback"**
+   -  Enable **"Send all feedback"**
 5. Click **OK** and **Apply**
 
 ### Claude Desktop Config
@@ -82,7 +83,7 @@ Add to `claude_desktop_config.json`:
 }
 ```
 
-## 🎼 Usage Examples
+##  Usage Examples
 
 ### Natural Language (via Claude)
 
@@ -95,7 +96,7 @@ Add to `claude_desktop_config.json`:
 "Arm track 1 for recording and start recording"
 ```
 
-### ReaScript JSON Support 📊
+### ReaScript JSON Support 
 
 Scripts can now return structured data by setting the `_result` variable:
 
@@ -137,41 +138,52 @@ reaper_project("render", format="wav", quality="high")
 reaper_system("status")
 reaper_system("help")
 reaper_system("capabilities")
+
+# Orchestrator workflow
+reaper_orchestrator("stem_import", stems_folder="D:/music/sg2-output")
+reaper_orchestrator("fx_chain", vibe="classical_master", stems_folder="D:/music/sg2-output")
+reaper_orchestrator("regions", regions_text="[verse] 00:10-00:42 [chorus] 00:42-01:10")
+reaper_orchestrator(
+    "full_pipeline",
+    stems_folder="D:/music/sg2-output",
+    vibe="dark_techno",
+    regions_text="[intro] 00:00-00:16 [drop] 00:48-01:20",
+)
 ```
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Claude / Cursor                          │
-│                         (MCP Client)                            │
-└─────────────────────────┬───────────────────────────────────────┘
-                          │ MCP Protocol (stdio)
-                          ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      Reaper MCP Server                          │
-│                        (FastMCP 3.1)                           │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │  Portmanteau Tools + Prompts + Skills (optional)          │   │
-│  │  transport │ tracks │ project │ system │ reascript        │   │
-│  └──────────────────────────┬───────────────────────────────┘   │
-│                             ▼                                    │
-│              ┌─────────────────────┐                            │
-│              │     OSC Client      │                            │
-│              │    (python-osc)     │                            │
-│              └──────────┬──────────┘                            │
-└─────────────────────────┼───────────────────────────────────────┘
-                          │ OSC UDP (localhost:8000)
-                          ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                         Reaper DAW                              │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │                   OSC Control Surface                      │  │
-│  └───────────────────────────────────────────────────────────┘  │
-│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌─────────────┐  │
-│  │ Transport │  │  Tracks   │  │  Mixer    │  │   Project   │  │
-│  └───────────┘  └───────────┘  └───────────┘  └─────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+
+                        Claude / Cursor                          
+                         (MCP Client)                            
+
+                           MCP Protocol (stdio)
+                          
+
+                      Reaper MCP Server                          
+                        (FastMCP 3.1)                           
+     
+    Portmanteau Tools + Prompts + Skills (optional)             
+    transport  tracks  project  system  reascript           
+     
+                                                                 
+                                          
+                   OSC Client                                  
+                  (python-osc)                                 
+                                          
+
+                           OSC UDP (localhost:8000)
+                          
+
+                         Reaper DAW                              
+    
+                     OSC Control Surface                        
+    
+          
+   Transport     Tracks       Mixer         Project     
+          
+
 ```
 
 ## Configuration
@@ -191,13 +203,26 @@ REAPER_PATH=C:/Program Files/REAPER/reaper.exe
 REAPER_PROJECT_PATH=D:/Music/Projects
 ```
 
-## 🧪 Testing Scaffold
+##  Testing Scaffold
 
 This project includes an extensive testing scaffold for both local development and CI:
 
 - **Unit Tests**: `pytest tests/unit` (Mocked OSC/Reapy)
 - **Integration Tests**: `pytest tests/integration` (Local server loopback)
 - **E2E Verification**: `python scripts/verify_e2e.py` (Stdio transport verification)
+
+## Crosslink API Endpoints
+
+The backend now exposes a cross-repo integration surface at `\api\v1\crosslinks`:
+
+- `GET /api/v1/crosslinks/health` - crosslink API status and registry metrics
+- `GET /api/v1/crosslinks/repos` - list registered and discovered repos
+- `POST /api/v1/crosslinks/repos` - register repo metadata for integration
+- `GET /api/v1/crosslinks/repos/{repo_name}` - fetch one repo link entry
+- `GET /api/v1/crosslinks/repos/{repo_name}/endpoints` - integration endpoint templates
+- `GET /api/v1/crosslinks/search?q=...` - search registered links by name, tags, notes
+
+Set `REAPER_CROSSLINK_REPO_ROOT` if your repos are not under `D:\Dev\repos`.
 
 ## Troubleshooting
 

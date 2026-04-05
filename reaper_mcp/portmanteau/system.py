@@ -8,7 +8,11 @@ OPERATIONS:
 """
 
 import logging
+import os
+import platform
+import subprocess
 from typing import Any
+
 from fastmcp import Context
 
 from ..osc_client import get_reaper_client, ensure_connected
@@ -55,9 +59,6 @@ def setup_system_portmanteau(mcp):
             }
 
         if operation == "start_reaper":
-            import subprocess
-            import platform
-
             system = platform.system()
             reaper_path = None
 
@@ -69,8 +70,6 @@ def setup_system_portmanteau(mcp):
                     r"D:\REAPER\reaper.exe",  # User specific potential path
                 ]
                 for p in paths:
-                    import os
-
                     if os.path.exists(p):
                         reaper_path = p
                         break
@@ -159,6 +158,7 @@ def setup_system_portmanteau(mcp):
                 "reaper_tracks": "Track management: list, info, mute, solo, arm, count, bulk",
                 "reaper_project": "Project ops: info, save, marker, render, stats",
                 "reaper_system": "System: status, help, capabilities",
+                "reaper_orchestrator": "Workflow automation: stem_import, fx_chain, regions, full_pipeline",
             }
 
             category_help = {
@@ -193,6 +193,10 @@ def setup_system_portmanteau(mcp):
                     "tool": "reaper_system",
                     "operations": ["status", "help", "capabilities"],
                 },
+                "orchestrator": {
+                    "tool": "reaper_orchestrator",
+                    "operations": ["stem_import", "fx_chain", "regions", "full_pipeline"],
+                },
             }
 
             if tool_name:
@@ -218,7 +222,7 @@ def setup_system_portmanteau(mcp):
         elif operation == "capabilities":
             return {
                 "operation": "capabilities",
-                "total_tools": 4,
+                "total_tools": 5,
                 "tools": {
                     "reaper_transport": [
                         "play",
@@ -239,6 +243,12 @@ def setup_system_portmanteau(mcp):
                     ],
                     "reaper_project": ["info", "save", "marker", "render", "stats"],
                     "reaper_system": ["status", "help", "capabilities"],
+                    "reaper_orchestrator": [
+                        "stem_import",
+                        "fx_chain",
+                        "regions",
+                        "full_pipeline",
+                    ],
                 },
                 "protocol": "OSC",
                 "fastmcp_version": "2.13.1",

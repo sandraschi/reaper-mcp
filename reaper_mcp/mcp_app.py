@@ -26,6 +26,7 @@ CORE CAPABILITIES:
 - Project: info, save, markers, render, stats
 - System: status, help, capabilities; start Reaper
 - ReaScript: run Python in Reaper, setup reapy, API help
+- Orchestrator: SG2 stem import, vibe FX chain, region marker automation
 
 AGENTIC WORKFLOWS:
 - Chain tools (e.g. reaper_system status -> reaper_transport play -> reaper_tracks list)

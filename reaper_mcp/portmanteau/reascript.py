@@ -1,8 +1,9 @@
 """
-ReaScript Portmanteau Tool
+ReaScript Portmanteau Tool.
 """
 
-from typing import Literal
+import json
+from typing import Any, Literal
 
 from fastmcp import FastMCP
 
@@ -13,6 +14,30 @@ try:
     REAPY_AVAILABLE = True
 except ImportError:
     REAPY_AVAILABLE = False
+
+
+def execute_reascript_code(code: str) -> dict[str, Any]:
+    """Execute Python ReaScript code and return structured output."""
+    if not REAPY_AVAILABLE:
+        return {"success": False, "error": "reapy-boost is not installed."}
+
+    if not code.strip():
+        return {"success": False, "error": "Code is required."}
+
+    try:
+        local_scope: dict[str, Any] = {"reapy": reapy}
+        local_scope.update({k: v for k, v in RPR.__dict__.items() if k.startswith("RPR_")})
+        local_scope["RPR"] = RPR
+        exec(code, local_scope)  # noqa: S102 (intentional ReaScript execution)
+
+        raw_result = local_scope.get("_result")
+        if raw_result is None:
+            return {"success": True, "message": "Code executed successfully."}
+        if isinstance(raw_result, dict):
+            return {"success": True, "result": raw_result}
+        return {"success": True, "result": raw_result}
+    except Exception as e:
+        return {"success": False, "error": f"Error executing ReaScript: {e}"}
 
 
 def setup_reascript_portmanteau(mcp: FastMCP):
@@ -50,27 +75,15 @@ def setup_reascript_portmanteau(mcp: FastMCP):
         elif operation == "run":
             if not code:
                 return "Error: 'code' argument required for 'run' operation."
-            try:
-                # Execute
-                local_scope = {"reapy": reapy}
-                # Inject RPR functions
-                local_scope.update({k: v for k, v in RPR.__dict__.items() if k.startswith("RPR_")})
-                local_scope["RPR"] = RPR
-
-                exec(code, local_scope)  # noqa: S102 (intentional ReaScript execution)
-
-                # Check for structured result
-                if "_result" in local_scope:
-                    import json
-
-                    try:
-                        return json.dumps(local_scope["_result"], indent=2)
-                    except Exception as e:
-                        return f"Error serializing _result: {e}"
-
-                return "Code executed successfully."
-            except Exception as e:
-                return f"Error executing ReaScript: {e}"
+            result = execute_reascript_code(code)
+            if not result.get("success"):
+                return f"Error: {result.get('error', 'Unknown error')}"
+            if "result" in result:
+                try:
+                    return json.dumps(result["result"], indent=2)
+                except Exception as e:
+                    return f"Error serializing _result: {e}"
+            return result.get("message", "Code executed successfully.")
 
         elif operation == "api_help":
             if not function_name:
