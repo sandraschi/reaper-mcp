@@ -1,6 +1,8 @@
 # Reaper MCP Server
 
-[![FastMCP](https://img.shields.io/badge/FastMCP-3.1-blue.svg)](https://gofastmcp.com)
+[![FastMCP Version](https://img.shields.io/badge/FastMCP-3.1-blue?style=flat-square&logo=python&logoColor=white)](https://github.com/sandraschi/fastmcp) [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff) [![Linted with Biome](https://img.shields.io/badge/Linted_with-Biome-60a5fa?style=flat-square&logo=biome&logoColor=white)](https://biomejs.dev/) [![Built with Just](https://img.shields.io/badge/Built_with-Just-000000?style=flat-square&logo=gnu-bash&logoColor=white)](https://github.com/casey/just)
+
+[![FastMCP](https://img.shields.io/badge/FastMCP-3.1-blue.svg)](https://goFastMCP 3.1com)
 [![Portmanteau](https://img.shields.io/badge/Tools-6%20Portmanteau-purple.svg)](#-portmanteau-tools)
 
 **Austrian precision DAW automation via Reaper with OSC control.**
@@ -258,3 +260,14 @@ Set `REAPER_CROSSLINK_REPO_ROOT` if your repos are not under `D:\Dev\repos`.
 Web interface for monitoring and control. Ports: **10796** (frontend), **10797** (backend). MCP streamable HTTP at **http://localhost:10797/mcp**.
 
 To start: from repo root run `web_sota\start.ps1` (PowerShell), then open `http://localhost:10796`.
+
+
+## 🛡️ Industrial Quality Stack
+
+This project adheres to **SOTA 14.1** industrial standards for high-fidelity agentic orchestration:
+
+- **Python (Core)**: [Ruff](https://astral.sh/ruff) for linting and formatting. Zero-tolerance for `print` statements in core handlers (`T201`).
+- **Webapp (UI)**: [Biome](https://biomejs.dev/) for sub-millisecond linting. Strict `noConsoleLog` enforcement.
+- **Protocol Compliance**: Hardened `stdout/stderr` isolation to ensure crash-resistant JSON-RPC communication.
+- **Automation**: [Justfile](./justfile) recipes for all fleet operations (`just lint`, `just fix`, `just dev`).
+- **Security**: Automated audits via `bandit` and `safety`.
