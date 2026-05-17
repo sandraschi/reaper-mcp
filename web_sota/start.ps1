@@ -1,4 +1,4 @@
-﻿Param([switch]$Headless)
+Param([switch]$Headless)
 
 # --- SOTA Headless Standard ---
 if ($Headless -and ($Host.UI.RawUI.WindowTitle -notmatch 'Hidden')) {
@@ -8,42 +8,71 @@ if ($Headless -and ($Host.UI.RawUI.WindowTitle -notmatch 'Hidden')) {
 $WindowStyle = if ($Headless) { 'Hidden' } else { 'Normal' }
 # ------------------------------
 
-# Webapp Start - Standardized SOTA (Auto-Repaired V2.5)
 $WebPort = 10796
 $BackendPort = 10797
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 
-# 1. Kill any process squatting on the ports
-Write-Host "Checking for port squatters on $WebPort and $BackendPort..." -ForegroundColor Yellow
-$pids = Get-NetTCPConnection -LocalPort $WebPort, $BackendPort -ErrorAction SilentlyContinue | Where-Object { $_.OwningProcess -gt 4 } | Select-Object -ExpandProperty OwningProcess -Unique
-foreach ($p in $pids) {
-    Write-Host "Found squatter (PID: $p). Terminating..." -ForegroundColor Red
-    try { Stop-Process -Id $p -Force -ErrorAction Stop } catch { Write-Host "Warning: Could not terminate PID $p." -ForegroundColor Gray }
+function Clear-Port {
+    param([int]$Port)
+    $conn = Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue | Where-Object { $_.OwningProcess -gt 4 } | Select-Object -First 1
+    if (-not $conn) { return $false }
+    $pid = $conn.OwningProcess
+    $proc = Get-Process -Id $pid -ErrorAction SilentlyContinue
+    $name = if ($proc) { $proc.ProcessName } else { "PID $pid" }
+    Write-Host "Port $Port held by $name (PID: $pid). Freeing..." -ForegroundColor Yellow
+    try { Stop-Process -Id $pid -Force -ErrorAction Stop; Start-Sleep 1; return $true } catch {}
+    try { taskkill /F /PID $pid 2>&1 | Out-Null; Start-Sleep 1; return $true } catch {}
+    Write-Host "  Could not free port $Port. Run as Admin: taskkill /F /PID $pid" -ForegroundColor Red
+    return $false
 }
 
-# 2. Setup
+Write-Host "`n=== Reaper MCP ===" -ForegroundColor Cyan
+Write-Host "Ports: backend :$BackendPort | frontend :$WebPort`n" -ForegroundColor Gray
+
+Clear-Port $WebPort | Out-Null
+
+# 1. Setup
 Set-Location $PSScriptRoot
-if (-not (Test-Path "node_modules")) { npm install }
+if (-not (Test-Path "node_modules")) {
+    Write-Host "Installing frontend deps..." -ForegroundColor Cyan
+    npm install
+}
 
-# 3. Start the Python backend (Background)
-Write-Host "Starting Python backend on port $BackendPort ..." -ForegroundColor Cyan
+# 2. Backend: check if already running
+$HealthUrl = "http://127.0.0.1:$BackendPort/health"
+$backendUp = $false
+try {
+    $r = Invoke-WebRequest -Uri $HealthUrl -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
+    if ($r.StatusCode -eq 200) { $backendUp = $true }
+} catch {}
 
-# Run backend from project root so uv finds reaper_mcp package
-$backendCmd = "Set-Location '$ProjectRoot'; uv run --project '$ProjectRoot' uvicorn reaper_mcp.server:app --host 127.0.0.1 --port $BackendPort --log-level info"
+if ($backendUp) {
+    Write-Host "Backend: already running on :$BackendPort" -ForegroundColor Green
+} else {
+    Clear-Port $BackendPort | Out-Null
+    Write-Host "Backend: starting on :$BackendPort ..." -ForegroundColor Cyan
+    $backendCmd = "Set-Location '$ProjectRoot'; uv run --project '$ProjectRoot' uvicorn reaper_mcp.server:app --host 127.0.0.1 --port $BackendPort --log-level info"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", $backendCmd -WindowStyle $WindowStyle
+    Start-Sleep 3
+}
 
-Start-Process powershell -ArgumentList "-NoExit", "-Command", $backendCmd -WindowStyle Normal
+# 3. Frontend: check if Vite is already up
+$WebUrl = "http://127.0.0.1:$WebPort/"
+$viteUp = $false
+try {
+    $r = Invoke-WebRequest -Uri $WebUrl -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
+    if ($r.StatusCode -eq 200) { $viteUp = $true }
+} catch {}
 
-# 4. Run server (Vite dev)
-Write-Host "Starting Vite frontend on port $WebPort ..." -ForegroundColor Green
+if ($viteUp) {
+    Write-Host "Frontend: already running on :$WebPort" -ForegroundColor Green
+    Write-Host "Open $WebUrl in your browser." -ForegroundColor Gray
+    exit 0
+}
 
-# 4b. Launch background task to open browser once frontend is ready (Auto-opened by Antigravity)
-$frontendUrl = "http://127.0.0.1:$WebPort/"
-$pollAndOpen = "for (`$i = 0; `$i -lt 60; `$i++) { try { `$null = Invoke-WebRequest -Uri '$frontendUrl' -TimeoutSec 2 -UseBasicParsing -ErrorAction Stop; Start-Process '$frontendUrl'; exit } catch { Start-Sleep -Seconds 1 } }"
-Start-Process powershell -ArgumentList "-NoProfile", "-WindowStyle", "Hidden", "-Command", $pollAndOpen
-
-Write-Host "Browser will open automatically when Vite is ready." -ForegroundColor Gray
+# 4. Start Vite
+Write-Host "Frontend: starting Vite on :$WebPort ..." -ForegroundColor Green
+$poll = "for (`$i = 0; `$i -lt 60; `$i++) { try { `$null = Invoke-WebRequest -Uri '$WebUrl' -TimeoutSec 2 -UseBasicParsing -ErrorAction Stop; Start-Process '$WebUrl'; exit } catch { Start-Sleep 1 } }"
+Start-Process powershell -ArgumentList "-NoProfile", "-WindowStyle", "Hidden", "-Command", $poll
+Write-Host "Browser will open automatically when ready." -ForegroundColor Gray
 npm run dev -- --port $WebPort --host
-
-
-
-
