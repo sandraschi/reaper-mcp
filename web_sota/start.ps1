@@ -22,6 +22,10 @@ function Clear-Port {
     Write-Host "Port $Port held by $name (PID: $pid). Freeing..." -ForegroundColor Yellow
     try { Stop-Process -Id $pid -Force -ErrorAction Stop; Start-Sleep 1; return $true } catch {}
     try { taskkill /F /PID $pid 2>&1 | Out-Null; Start-Sleep 1; return $true } catch {}
+    try {
+        $cim = Get-CimInstance -ClassName Win32_Process -Filter "ProcessId = $pid" -ErrorAction Stop
+        if ($cim) { Invoke-CimMethod -InputObject $cim -MethodName Terminate -ErrorAction Stop | Out-Null; Start-Sleep 1; return $true }
+    } catch {}
     Write-Host "  Could not free port $Port. Run as Admin: taskkill /F /PID $pid" -ForegroundColor Red
     return $false
 }
