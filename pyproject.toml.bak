@@ -63,7 +63,7 @@ reaper-mcp = "reaper_mcp.__main__:main"
 packages = ["reaper_mcp"]
 
 [tool.hatch.build.targets.wheel.force-include]
-"prompts" = "reaper_mcp/prompts"
+"reaper_mcp/prompts" = "reaper_mcp/prompts"
 
 [tool.black]
 line-length = 100
