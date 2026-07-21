@@ -1,7 +1,7 @@
-import sys
 import os
+import sys
 from pathlib import Path
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -14,6 +14,8 @@ if str(ROOT) not in sys.path:
 sys.modules["reapy"] = MagicMock()
 sys.modules["reapy.core"] = MagicMock()
 sys.modules["pythonosc"] = MagicMock()
+sys.modules["pythonosc.dispatcher"] = MagicMock()
+sys.modules["pythonosc.osc_server"] = MagicMock()
 sys.modules["pythonosc.udp_client"] = MagicMock()
 
 import server
@@ -31,9 +33,7 @@ def mock_osc_client(monkeypatch):
         return mock_client
 
     monkeypatch.setattr("reaper_mcp.osc_client.get_reaper_client", mock_get_client)
-    monkeypatch.setattr(
-        "reaper_mcp.osc_client.ensure_connected", AsyncMock(return_value=True)
-    )
+    monkeypatch.setattr("reaper_mcp.osc_client.ensure_connected", AsyncMock(return_value=True))
     return mock_client
 
 

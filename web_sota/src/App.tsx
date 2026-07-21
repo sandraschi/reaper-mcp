@@ -9,6 +9,8 @@ import { Tools } from '@/pages/tools';
 import { Reascript } from '@/pages/reascript';
 import { Status } from '@/pages/status';
 import { Help } from '@/pages/help';
+import Logging from '@/pages/Logging';
+import { ApiDocsPage } from './pages/api-docs';
 
 function App() {
   return (
@@ -23,7 +25,9 @@ function App() {
           <Route path="/reascript" element={<Reascript />} />
           <Route path="/status" element={<Status />} />
           <Route path="/help" element={<Help />} />
+          <Route path="/api-docs" element={<ApiDocsPage />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/logs" element={<Logging />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppLayout>

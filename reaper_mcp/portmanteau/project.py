@@ -10,9 +10,11 @@ OPERATIONS:
 """
 
 import logging
-from typing import Any
+from typing import Annotated, Any
 
-from ..osc_client import get_reaper_client, ensure_connected
+from pydantic import Field
+
+from ..osc_client import ensure_connected, get_reaper_client
 
 logger = logging.getLogger(__name__)
 
@@ -40,14 +42,18 @@ def setup_project_portmanteau(mcp):
 
     @mcp.tool()
     async def reaper_project(
-        operation: str,
-        position: str | None = None,
-        name: str | None = None,
-        format: str = "wav",
-        quality: str = "high",
-        bounds: str = "project",
+        operation: Annotated[str, Field(description="Operation to perform: info, save, marker, render, stats")],
+        position: Annotated[str | None, Field(description="Time position for marker (e.g., '1:30', '90.5')")] = None,
+        name: Annotated[str | None, Field(description="Marker name/description")] = None,
+        format: Annotated[str, Field(description="Render format: wav, mp3, flac")] = "wav",
+        quality: Annotated[str, Field(description="Render quality: low, medium, high, lossless")] = "high",
+        bounds: Annotated[str, Field(description="Render bounds: project, selection, time_selection")] = "project",
     ) -> dict[str, Any]:
         """Consolidated project management for Reaper DAW.
+
+        [RATIONALE]
+        Consolidates project lifecycle operations (info, save, marker, render, stats)
+        into one tool to keep the tool registry manageable.
 
         OPERATIONS:
         - info: Get current project information
@@ -56,23 +62,13 @@ def setup_project_portmanteau(mcp):
         - render: Render/bounce project (format, quality, bounds)
         - stats: Get comprehensive project statistics
 
-        Args:
-            operation: Operation to perform
-            position: Time position for marker (e.g., "1:30", "90.5")
-            name: Marker name/description
-            format: Render format (wav, mp3, flac)
-            quality: Render quality (low, medium, high, lossless)
-            bounds: Render bounds (project, selection, time_selection)
+        ## Return Format
+        {"success": bool, "operation": str, "message"?: str, "error"?: str, ...}
 
-        Returns:
-            Operation result with project data
-
-        Examples:
-            reaper_project("info")                              # Project info
-            reaper_project("save")                              # Save project
-            reaper_project("marker", position="1:30", name="Chorus")  # Add marker
-            reaper_project("render", format="wav", quality="high")    # Render
-            reaper_project("stats")                             # Full statistics
+        ## Examples
+        reaper_project(operation="info")
+        reaper_project(operation="marker", position="1:30", name="Chorus")
+        reaper_project(operation="render", format="wav", quality="high")
         """
         valid_ops = ["info", "save", "marker", "render", "stats"]
         if operation not in valid_ops:
@@ -109,9 +105,7 @@ def setup_project_portmanteau(mcp):
                 return {
                     **result,
                     "operation": "save",
-                    "message": "💾 Project saved"
-                    if result.get("success")
-                    else "❌ Save failed",
+                    "message": "💾 Project saved" if result.get("success") else "❌ Save failed",
                 }
 
             elif operation == "marker":
@@ -148,11 +142,7 @@ def setup_project_portmanteau(mcp):
                 project_info = await client.get_project_info()
                 track_count = await client.get_track_count()
                 position_info = await client.get_position()
-                position = (
-                    position_info.get("args", ["0:00:00"])[0]
-                    if position_info.get("args")
-                    else "0:00:00"
-                )
+                position = position_info.get("args", ["0:00:00"])[0] if position_info.get("args") else "0:00:00"
 
                 return {
                     "operation": "stats",

@@ -4,8 +4,9 @@ Austrian precision project control and automation
 """
 
 import logging
-from typing import Dict, Any
-from .osc_client import get_reaper_client, ensure_connected
+from typing import Any
+
+from .osc_client import ensure_connected, get_reaper_client
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ def register_project_tools(mcp):
     """Register project management tools with FastMCP server"""
 
     @mcp.tool()
-    async def get_project_info() -> Dict[str, Any]:
+    async def get_project_info() -> dict[str, Any]:
         """Get current Reaper project information
 
         Returns:
@@ -55,7 +56,7 @@ def register_project_tools(mcp):
             }
 
     @mcp.tool()
-    async def save_project() -> Dict[str, Any]:
+    async def save_project() -> dict[str, Any]:
         """Save current Reaper project
 
         Returns:
@@ -74,9 +75,7 @@ def register_project_tools(mcp):
 
             return {
                 **result,
-                "message": "💾 Project saved successfully"
-                if result.get("success")
-                else "❌ Save failed",
+                "message": "💾 Project saved successfully" if result.get("success") else "❌ Save failed",
                 "timestamp": "now",
                 "austrian_reliability": "Gespeichert! 🇦🇹",
             }
@@ -85,7 +84,7 @@ def register_project_tools(mcp):
             return {"action": "save", "success": False, "error": str(e)}
 
     @mcp.tool()
-    async def add_marker(position: str, name: str) -> Dict[str, Any]:
+    async def add_marker(position: str, name: str) -> dict[str, Any]:
         """Add timeline marker at specific position
 
         Args:
@@ -127,9 +126,7 @@ def register_project_tools(mcp):
             }
 
     @mcp.tool()
-    async def render_project(
-        format: str = "wav", quality: str = "high", bounds: str = "project"
-    ) -> Dict[str, Any]:
+    async def render_project(format: str = "wav", quality: str = "high", bounds: str = "project") -> dict[str, Any]:
         """Render/bounce current project or selection
 
         Args:
@@ -175,7 +172,7 @@ def register_project_tools(mcp):
             }
 
     @mcp.tool()
-    async def get_project_stats() -> Dict[str, Any]:
+    async def get_project_stats() -> dict[str, Any]:
         """Get comprehensive project statistics
 
         Returns:

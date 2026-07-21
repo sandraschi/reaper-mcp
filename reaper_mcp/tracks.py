@@ -4,9 +4,10 @@ Austrian precision track control and automation
 """
 
 import logging
-from typing import Dict, Any, List
-from .osc_client import get_reaper_client, ensure_connected
-from .validation import TrackValidation, CommonValidation, ValidationError
+from typing import Any
+
+from .osc_client import ensure_connected, get_reaper_client
+from .validation import CommonValidation, TrackValidation, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ def register_track_tools(mcp):
     """Register track management tools with FastMCP server"""
 
     @mcp.tool()
-    async def get_tracks() -> List[Dict[str, Any]]:
+    async def get_tracks() -> list[dict[str, Any]]:
         """Get list of all tracks in current Reaper project
 
         Returns:
@@ -53,7 +54,7 @@ def register_track_tools(mcp):
             return [{"error": str(e), "connected": False}]
 
     @mcp.tool()
-    async def get_track_info(track_id: int) -> Dict[str, Any]:
+    async def get_track_info(track_id: int) -> dict[str, Any]:
         """Get detailed information for specific track
 
         Args:
@@ -100,7 +101,7 @@ def register_track_tools(mcp):
             }
 
     @mcp.tool()
-    async def arm_track_recording(track_id: int, armed: bool = True) -> Dict[str, Any]:
+    async def arm_track_recording(track_id: int, armed: bool = True) -> dict[str, Any]:
         """Arm or disarm track for recording
 
         Args:
@@ -157,7 +158,7 @@ def register_track_tools(mcp):
             }
 
     @mcp.tool()
-    async def mute_track(track_id: int, muted: bool = True) -> Dict[str, Any]:
+    async def mute_track(track_id: int, muted: bool = True) -> dict[str, Any]:
         """Mute or unmute a track
 
         Args:
@@ -195,7 +196,7 @@ def register_track_tools(mcp):
             }
 
     @mcp.tool()
-    async def solo_track(track_id: int, solo: bool = True) -> Dict[str, Any]:
+    async def solo_track(track_id: int, solo: bool = True) -> dict[str, Any]:
         """Solo or unsolo a track
 
         Args:
@@ -233,7 +234,7 @@ def register_track_tools(mcp):
             }
 
     @mcp.tool()
-    async def get_track_count() -> Dict[str, Any]:
+    async def get_track_count() -> dict[str, Any]:
         """Get total number of tracks in project
 
         Returns:
@@ -261,9 +262,7 @@ def register_track_tools(mcp):
             return {"track_count": 0, "connected": False, "error": str(e)}
 
     @mcp.tool()
-    async def bulk_track_operation(
-        operation: str, track_ids: List[int], value: bool = True
-    ) -> Dict[str, Any]:
+    async def bulk_track_operation(operation: str, track_ids: list[int], value: bool = True) -> dict[str, Any]:
         """Perform bulk operations on multiple tracks
 
         Args:
@@ -302,9 +301,7 @@ def register_track_tools(mcp):
                 elif operation == "arm":
                     result = await client.set_track_arm(track_id, value)
 
-                results.append(
-                    {"track_id": track_id, "success": result.get("success", False)}
-                )
+                results.append({"track_id": track_id, "success": result.get("success", False)})
 
             successful = sum(1 for r in results if r["success"])
 

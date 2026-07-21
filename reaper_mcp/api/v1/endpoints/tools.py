@@ -70,7 +70,7 @@ async def list_tools() -> list[ToolInfo]:
         logger.exception("Error listing tools")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error listing tools: {str(e)}",
+            detail=f"Error listing tools: {e!s}",
         ) from e
 
 

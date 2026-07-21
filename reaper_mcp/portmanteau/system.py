@@ -11,11 +11,12 @@ import logging
 import os
 import platform
 import subprocess
-from typing import Any
+from typing import Annotated, Any
 
 from fastmcp import Context
+from pydantic import Field
 
-from ..osc_client import get_reaper_client, ensure_connected
+from ..osc_client import ensure_connected, get_reaper_client
 
 logger = logging.getLogger(__name__)
 
@@ -25,30 +26,28 @@ def setup_system_portmanteau(mcp):
 
     @mcp.tool()
     async def reaper_system(
-        operation: str,
-        category: str | None = None,
-        tool_name: str | None = None,
+        operation: Annotated[str, Field(description="Operation: status, help, capabilities")],
+        category: Annotated[str | None, Field(description="Help category: transport, tracks, project, system")] = None,
+        tool_name: Annotated[str | None, Field(description="Specific tool name for targeted help")] = None,
     ) -> dict[str, Any]:
         """Consolidated system management for Reaper MCP.
+
+        [RATIONALE]
+        Consolidates server status, help, and capabilities into one tool
+        to provide a single entry point for system-level introspection.
 
         OPERATIONS:
         - status: Get server and Reaper connection status
         - help: Get help (optional: category or tool_name)
         - capabilities: List all available tools
 
-        Args:
-            operation: Operation to perform (status, help, capabilities)
-            category: For help - filter by category (transport, tracks, project, system)
-            tool_name: For help - get specific tool help
+        ## Return Format
+        {"success": bool, "operation": str, "server"?: dict, "reaper_connection"?: dict, "error"?: str}
 
-        Returns:
-            System information and help content
-
-        Examples:
-            reaper_system("status")                    # Connection status
-            reaper_system("help")                      # Overview help
-            reaper_system("help", category="transport") # Transport help
-            reaper_system("capabilities")              # List all tools
+        ## Examples
+        reaper_system(operation="status")
+        reaper_system(operation="help", category="transport")
+        reaper_system(operation="capabilities")
         """
         valid_ops = ["status", "help", "capabilities"]
         if operation not in valid_ops:
@@ -294,4 +293,4 @@ def setup_system_portmanteau(mcp):
             return "🎵 Webapp launching at http://localhost:10796. Check console for status."
 
         except Exception as e:
-            return f"Failed to launch webapp: {str(e)}"
+            return f"Failed to launch webapp: {e!s}"

@@ -39,10 +39,10 @@ def setup_all_portmanteau_tools(mcp):
 
 __all__ = [
     "setup_all_portmanteau_tools",
-    "setup_transport_portmanteau",
-    "setup_tracks_portmanteau",
-    "setup_project_portmanteau",
-    "setup_system_portmanteau",
-    "setup_reascript_portmanteau",
     "setup_orchestrator_portmanteau",
+    "setup_project_portmanteau",
+    "setup_reascript_portmanteau",
+    "setup_system_portmanteau",
+    "setup_tracks_portmanteau",
+    "setup_transport_portmanteau",
 ]

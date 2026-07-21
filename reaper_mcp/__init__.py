@@ -5,9 +5,7 @@ FastMCP 2.1 compliant audio workstation automation for Reaper DAW
 
 __version__ = "1.0.0"
 __author__ = "Sandra's Austrian Audio Automation 🇦🇹"
-__description__ = (
-    "Reaper DAW automation with OSC control and Austrian engineering quality"
-)
+__description__ = "Reaper DAW automation with OSC control and Austrian engineering quality"
 
 # Default Reaper configuration
 DEFAULT_OSC_HOST = "127.0.0.1"

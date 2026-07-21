@@ -4,8 +4,9 @@ Austrian precision audio playback automation
 """
 
 import logging
-from typing import Dict, Any
-from .osc_client import get_reaper_client, ensure_connected
+from typing import Any
+
+from .osc_client import ensure_connected, get_reaper_client
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ def register_transport_tools(mcp):
     """Register transport control tools with FastMCP server"""
 
     @mcp.tool()
-    async def play_transport() -> Dict[str, Any]:
+    async def play_transport() -> dict[str, Any]:
         """Start playback in Reaper
 
         Returns:
@@ -41,7 +42,7 @@ def register_transport_tools(mcp):
             return {"action": "play", "success": False, "error": str(e)}
 
     @mcp.tool()
-    async def stop_transport() -> Dict[str, Any]:
+    async def stop_transport() -> dict[str, Any]:
         """Stop playback in Reaper
 
         Returns:
@@ -63,7 +64,7 @@ def register_transport_tools(mcp):
             return {"action": "stop", "success": False, "error": str(e)}
 
     @mcp.tool()
-    async def pause_transport() -> Dict[str, Any]:
+    async def pause_transport() -> dict[str, Any]:
         """Pause playback in Reaper
 
         Returns:
@@ -85,7 +86,7 @@ def register_transport_tools(mcp):
             return {"action": "pause", "success": False, "error": str(e)}
 
     @mcp.tool()
-    async def record_transport() -> Dict[str, Any]:
+    async def record_transport() -> dict[str, Any]:
         """Start recording in Reaper
 
         Returns:
@@ -111,7 +112,7 @@ def register_transport_tools(mcp):
             return {"action": "record", "success": False, "error": str(e)}
 
     @mcp.tool()
-    async def get_transport_position() -> Dict[str, Any]:
+    async def get_transport_position() -> dict[str, Any]:
         """Get current transport position
 
         Returns:
@@ -128,9 +129,7 @@ def register_transport_tools(mcp):
             client = await get_reaper_client()
             result = await client.get_position()
             return {
-                "position": result.get("args", ["0:00:00"])[0]
-                if result.get("args")
-                else "0:00:00",
+                "position": result.get("args", ["0:00:00"])[0] if result.get("args") else "0:00:00",
                 "connected": True,
                 "last_update": result.get("timestamp", 0),
                 "transport_info": result,
@@ -140,7 +139,7 @@ def register_transport_tools(mcp):
             return {"position": "0:00:00", "connected": False, "error": str(e)}
 
     @mcp.tool()
-    async def transport_status() -> Dict[str, Any]:
+    async def transport_status() -> dict[str, Any]:
         """Get comprehensive transport status
 
         Returns:
@@ -163,9 +162,7 @@ def register_transport_tools(mcp):
                 "connected": client.connected,
                 "host": client.host,
                 "port": client.port,
-                "position": position_info.get("args", ["0:00:00"])[0]
-                if position_info.get("args")
-                else "0:00:00",
+                "position": position_info.get("args", ["0:00:00"])[0] if position_info.get("args") else "0:00:00",
                 "last_status": client.last_status,
                 "reaper_responsive": bool(position_info),
                 "austrian_status": "Alles in Ordnung! 🇦🇹",

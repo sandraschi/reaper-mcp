@@ -3,13 +3,14 @@ ReaScript Portmanteau Tool.
 """
 
 import json
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from fastmcp import FastMCP
+from pydantic import Field
 
 try:
     import reapy
-    import reapy.reascript_api as RPR  # noqa: N812 (RPR is ReaScript convention)
+    import reapy.reascript_api as RPR
 
     REAPY_AVAILABLE = True
 except ImportError:
@@ -45,22 +46,28 @@ def setup_reascript_portmanteau(mcp: FastMCP):
 
     @mcp.tool()
     def reaper_reascript(
-        operation: Literal["run", "setup", "api_help"],
-        code: str | None = None,
-        function_name: str | None = None,
+        operation: Annotated[Literal["run", "setup", "api_help"], Field(description="Operation: run, setup, api_help")],
+        code: Annotated[str | None, Field(description="Python code to run in Reaper (required for 'run')")] = None,
+        function_name: Annotated[str | None, Field(description="API function name (for 'api_help' op)")] = None,
     ) -> str:
         """
         Unified ReaScript operations for Reaper DAW.
+
+        [RATIONALE]
+        Consolidates ReaScript execution, setup, and API help into one tool
+        to keep the tool registry lean while exposing the full reapy surface.
 
         Operations:
         - run: Execute Python code in Reaper (requires 'code')
         - setup: Configure Reaper for reapy usage (run once)
         - api_help: Get docstring for Reaper API function (requires 'function_name')
 
-        Args:
-            operation: Action to perform
-            code: Python code to execute (for 'run')
-            function_name: API function name to look up (for 'api_help')
+        ## Return Format
+        str — JSON-formatted result for 'run', success/error message otherwise.
+
+        ## Examples
+        reaper_reascript(operation="run", code='RPR_ShowConsoleMsg("hello")')
+        reaper_reascript(operation="api_help", function_name="RPR_CountTracks")
         """
         if not REAPY_AVAILABLE:
             return "Error: reapy-boost is not installed."

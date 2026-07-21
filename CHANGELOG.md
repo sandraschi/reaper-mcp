@@ -1,3 +1,34 @@
+
+## [Unreleased] — 2026-07-13
+
+### Fixed
+- Security: CORS `allow_origins=["*"]` → fleet standard with explicit origins + unconditional regex (Tailscale, LAN, Tauri)
+- Security: `build.ps1` now bundles `.env.example` instead of `.env` (was leaking dev API keys)
+- Security: `tauri.conf.json` resources updated to `.env.example`
+- Tauri: `tauri.conf.json` targets changed from `["msi", "nsis"]` to `["nsis"]`
+- Tauri: `backend.rs` `free_port()` upgraded with image-name kill, UAC escalation, 240s poll loop, stream watching
+- Tauri: `build.ps1` bundles `.env.example` (NOT `.env`)
+- Metadata: `glama.json` updated (FastMCP version, tools count)
+- Layout: `.env.template` → `.env.example` (fleet convention)
+- Bare `except ImportError: pass` → logged warning in `mcp_app.py`
+
+### Added
+- `llms.txt` and `llms-full.txt` (fleet packaging standard)
+- `@mcp.resource("status://reaper/config")` for live config snapshot
+- `.cursorrules` for session context injection
+- CHANGELOG synced with current changes
+
+## [Unreleased] — 2026-06-14
+
+### Added
+- Tauri native wrapper (native/ directory) with bundle.resources + std::process::Command
+- CUA-NSIS: just cua-nsis-test recipe, scripts/cua-smoke.py, scripts/cua-nsis-config.json
+- Tauri CORS: tauri://localhost origins for WebView API access
+- NSIS installer at dist/ and native/target/release/bundle/nsis/
+
+### Changed
+- Frontend API calls use absolute http://127.0.0.1:{port} URLs in production build
+- CORS middleware includes allow_origin_regex for tauri.localhost
 # Changelog
 
 All notable changes to **Reaper MCP Server** will be documented in this file.
@@ -90,3 +121,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 *"Sin temor y sin esperanza" - Practical audio automation without hype.* 🎼🇦🇹
+

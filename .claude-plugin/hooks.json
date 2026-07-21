@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "SessionStart": [{
+      "matcher": "",
+      "hooks": [{
+        "type": "text",
+        "text": "## Session Context (Reaper MCP)\n\nYou have access to Reaper DAW automation tools via 6 portmanteau tools.\n\n**Before starting work:**\n1. Check transport status: reaper_transport(operation=\"status\")\n2. List tracks: reaper_tracks(operation=\"list\")\n\n**At end of work:**\n- Save the project: reaper_project(operation=\"save\")"
+      }]
+    }]
+  }
+}

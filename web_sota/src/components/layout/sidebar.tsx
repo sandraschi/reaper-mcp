@@ -11,7 +11,9 @@ import {
     List,
     Wrench,
     Code,
-    BookOpen
+    Code2,
+    BookOpen,
+    ScrollText
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -31,6 +33,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         { href: '/reascript', label: 'ReaScript IDE', icon: Code },
         { href: '/status', label: 'Status & Monitor', icon: Activity },
         { href: '/help', label: 'Documentation', icon: BookOpen },
+        { href: '/api-docs', label: 'API Docs', icon: Code2 },
+        { href: '/logs', label: 'Logs', icon: ScrollText },
         { href: '/settings', label: 'Settings', icon: Settings },
     ];
 

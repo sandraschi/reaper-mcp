@@ -6,7 +6,9 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
+
+from pydantic import Field
 
 from .reascript import execute_reascript_code
 
@@ -62,15 +64,11 @@ def _normalize_regions(raw_regions: str | list[dict[str, Any]]) -> list[dict[str
                 else _parse_timestamp_to_seconds(str(start_value))
             )
             end = (
-                float(end_value)
-                if isinstance(end_value, int | float)
-                else _parse_timestamp_to_seconds(str(end_value))
+                float(end_value) if isinstance(end_value, int | float) else _parse_timestamp_to_seconds(str(end_value))
             )
             if start is None or end is None or end <= start:
                 continue
-            normalized.append(
-                {"name": name, "start_seconds": start, "end_seconds": end}
-            )
+            normalized.append({"name": name, "start_seconds": start, "end_seconds": end})
         return normalized
 
     regions: list[dict[str, Any]] = []
@@ -155,21 +153,32 @@ def setup_orchestrator_portmanteau(mcp):
 
     @mcp.tool()
     async def reaper_orchestrator(
-        operation: str,
-        stems_folder: str | None = None,
-        vibe: str | None = None,
-        fx_chain_path: str | None = None,
-        target_track_name: str = "inst",
-        regions_text: str | None = None,
-        regions: list[dict[str, Any]] | None = None,
+        operation: Annotated[str, Field(description="Operation: stem_import, fx_chain, regions, full_pipeline")],
+        stems_folder: Annotated[str | None, Field(description="Folder with SG2 stem files")] = None,
+        vibe: Annotated[str | None, Field(description="Named vibe preset (classical_master, dark_techno)")] = None,
+        fx_chain_path: Annotated[str | None, Field(description="Path to .RfxChain file")] = None,
+        target_track_name: Annotated[str, Field(description="Target track for FX chain")] = "inst",
+        regions_text: Annotated[str | None, Field(description="Regions as text: [name] start-end")] = None,
+        regions: Annotated[list[dict[str, Any]] | None, Field(description="Regions as [{name, start, end}]")] = None,
     ) -> dict[str, Any]:
         """High-level Reaper orchestration for stem ingest, FX chain assignment, and regions.
 
+        [RATIONALE]
+        Consolidates the stem-to-mix production pipeline into one tool to avoid
+        tool registry bloat while preserving the full workflow surface.
+
         OPERATIONS:
-        - stem_import: Import SG2 stems (`vocal.wav`, `inst.wav`) as tracks
-        - fx_chain: Apply a vibe-mapped or explicit .RfxChain to target track
-        - regions: Create REAPER regions from SG2 timestamp metadata
+        - stem_import: Import SG2 stems (requires stems_folder)
+        - fx_chain: Apply .RfxChain to target track (requires fx_chain_path or vibe)
+        - regions: Create regions from timestamp metadata (requires regions_text or regions)
         - full_pipeline: Run stem_import, fx_chain, and regions sequentially
+
+        ## Return Format
+        {"success": bool, "operation": str, "message": str, "details"?: dict, "steps"?: dict, "error"?: str}
+
+        ## Examples
+        reaper_orchestrator(operation="stem_import", stems_folder="C:/SG2/project1")
+        reaper_orchestrator(operation="regions", regions_text="[verse] 00:10-00:30\\n[chorus] 00:45-01:15")
         """
         valid_ops = ["stem_import", "fx_chain", "regions", "full_pipeline"]
         if operation not in valid_ops:
@@ -208,9 +217,7 @@ def setup_orchestrator_portmanteau(mcp):
                         "expected_files": [s["filename"] for s in stem_specs],
                     }
 
-                import_result = execute_reascript_code(
-                    _build_stem_import_script(stems_to_import)
-                )
+                import_result = execute_reascript_code(_build_stem_import_script(stems_to_import))
                 if not import_result.get("success"):
                     return import_result
                 if operation == "stem_import":
@@ -243,9 +250,7 @@ def setup_orchestrator_portmanteau(mcp):
                         "error": "FX chain file not found",
                         "fx_chain_path": str(chain_path),
                     }
-                fx_result = execute_reascript_code(
-                    _build_fx_chain_script(target_track_name, str(chain_path.resolve()))
-                )
+                fx_result = execute_reascript_code(_build_fx_chain_script(target_track_name, str(chain_path.resolve())))
                 if not fx_result.get("success"):
                     return fx_result
                 if operation == "fx_chain":
@@ -258,18 +263,14 @@ def setup_orchestrator_portmanteau(mcp):
 
             regions_result: dict[str, Any] = {}
             if operation in ["regions", "full_pipeline"]:
-                resolved_regions = _normalize_regions(
-                    regions if regions is not None else (regions_text or "")
-                )
+                resolved_regions = _normalize_regions(regions if regions is not None else (regions_text or ""))
                 if not resolved_regions:
                     return {
                         "success": False,
                         "error": "No valid regions parsed",
                         "expected_format": "[chorus] 00:45-01:15",
                     }
-                regions_result = execute_reascript_code(
-                    _build_regions_script(resolved_regions)
-                )
+                regions_result = execute_reascript_code(_build_regions_script(resolved_regions))
                 if not regions_result.get("success"):
                     return regions_result
                 if operation == "regions":
@@ -293,4 +294,3 @@ def setup_orchestrator_portmanteau(mcp):
         except Exception as e:
             logger.error("reaper_orchestrator error: %s", e)
             return {"success": False, "operation": operation, "error": str(e)}
-

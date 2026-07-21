@@ -1,0 +1,71 @@
+# Reaper-MCP Full Reference
+
+FastMCP server for Reaper DAW automation via OSC and reapy-boost. Provides project management, track/transport control, crosslink orchestration, and ReaScript execution.
+
+## Architecture
+
+```
+Claude / Cursor ← MCP stdio → Reaper MCP Server ← OSC UDP → Reaper DAW
+                                  ↓
+                          FastAPI + MCP HTTP (/mcp)
+                                  ↓
+                          Vite React dashboard (port 10796)
+```
+
+## Ports
+
+| Service | Port |
+|---------|------|
+| Backend (FastAPI + MCP HTTP `/mcp`) | 10797 |
+| Frontend (Vite React) | 10796 |
+| OSC → Reaper (UDP) | 8000 |
+
+## MCP Tools
+
+### `reaper_transport`
+
+Playback control. Operations: play, stop, pause, record, position, status.
+
+### `reaper_tracks`
+
+Track management. Operations: list, info, mute, solo, arm, count, bulk.
+
+### `reaper_project`
+
+Project operations. Operations: info, save, marker, render, stats.
+
+### `reaper_system`
+
+System status. Operations: status, help, capabilities.
+
+### `reaper_reascript`
+
+ReaScript execution. Operations: run, setup, api_help.
+
+### `reaper_orchestrator`
+
+SG2-to-mix workflow automation. Operations: stem_import, fx_chain, regions, full_pipeline.
+
+## REST API
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Health check |
+| `/api/v1/tools` | GET | List MCP tools |
+| `/api/v1/tools/{name}` | POST | Call MCP tool |
+| `/mcp` | Various | Streamable HTTP MCP transport |
+
+## Configuration
+
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| `OSC_HOST` | OSC listen address | `127.0.0.1` |
+| `OSC_PORT` | OSC UDP port | `8000` |
+| `REAPER_TOOL_MODE` | portmanteau or individual | `portmanteau` |
+| `REAPER_PATH` | Reaper executable path | (optional) |
+
+## Known Issues
+
+- Requires Reaper DAW running with OSC control surface enabled
+- Share directory for prompts: `prompts/`
+- Tool mode can be toggled via `REAPER_TOOL_MODE` env var

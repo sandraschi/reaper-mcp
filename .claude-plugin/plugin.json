@@ -1,0 +1,6 @@
+{
+  "name": "reaper-mcp",
+  "version": "1.0.0",
+  "description": "Reaper DAW automation via FastMCP and OSC",
+  "hooks": "../.claude-plugin/hooks.json"
+}

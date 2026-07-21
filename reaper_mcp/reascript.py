@@ -4,6 +4,7 @@ Allows executing Python code directly within Reaper's environment.
 """
 
 import logging
+
 from fastmcp import FastMCP
 
 # Try to import reapy, handle failure gracefully if not installed/configured
@@ -44,7 +45,7 @@ def register_reascript_tools(mcp: FastMCP):
                 "If Reaper was not running, open it now."
             )
         except Exception as e:
-            return f"Error configuring reapy: {str(e)}. Make sure Reaper is installed."
+            return f"Error configuring reapy: {e!s}. Make sure Reaper is installed."
 
     @mcp.tool()
     def run_reascript(code: str) -> str:
@@ -85,9 +86,7 @@ def register_reascript_tools(mcp: FastMCP):
             # reapy.reascript_api contains these
             import reapy.reascript_api as RPR
 
-            local_scope.update(
-                {k: v for k, v in RPR.__dict__.items() if k.startswith("RPR_")}
-            )
+            local_scope.update({k: v for k, v in RPR.__dict__.items() if k.startswith("RPR_")})
             local_scope["RPR"] = RPR
 
             # Execute the code
@@ -97,7 +96,7 @@ def register_reascript_tools(mcp: FastMCP):
 
         except Exception as e:
             logger.error(f"ReaScript execution failed: {e}")
-            return f"Error executing ReaScript: {str(e)}"
+            return f"Error executing ReaScript: {e!s}"
 
     @mcp.tool()
     def get_reascript_api_docs(function_name: str = "") -> str:

@@ -12,9 +12,11 @@ OPERATIONS:
 """
 
 import logging
-from typing import Any
+from typing import Annotated, Any
 
-from ..osc_client import get_reaper_client, ensure_connected
+from pydantic import Field
+
+from ..osc_client import ensure_connected, get_reaper_client
 
 logger = logging.getLogger(__name__)
 
@@ -24,40 +26,34 @@ def setup_tracks_portmanteau(mcp):
 
     @mcp.tool()
     async def reaper_tracks(
-        operation: str,
-        track_id: int | None = None,
-        track_ids: list[int] | None = None,
-        value: bool = True,
-        bulk_operation: str | None = None,
+        operation: Annotated[str, Field(description="Operation to perform: list, info, mute, solo, arm, count, bulk")],
+        track_id: Annotated[int | None, Field(description="Track number (1-based) for single-track operations")] = None,
+        track_ids: Annotated[list[int] | None, Field(description="List of track IDs for bulk operations")] = None,
+        value: Annotated[bool, Field(description="True/False for mute/solo/arm operations")] = True,
+        bulk_operation: Annotated[str | None, Field(description="For bulk op: 'mute', 'solo', or 'arm'")] = None,
     ) -> dict[str, Any]:
         """Consolidated track management for Reaper DAW.
+
+        [RATIONALE]
+        Consolidates 7 track operations into one portmanteau tool to keep the
+        tool registry manageable while providing full track management coverage.
 
         OPERATIONS:
         - list: Get all tracks in project
         - info: Get specific track details (requires track_id)
-        - mute: Mute/unmute track (requires track_id, value=True/False)
-        - solo: Solo/unsolo track (requires track_id, value=True/False)
-        - arm: Arm/disarm for recording (requires track_id, value=True/False)
+        - mute: Mute/unmute track (requires track_id, value)
+        - solo: Solo/unsolo track (requires track_id, value)
+        - arm: Arm/disarm for recording (requires track_id, value)
         - count: Get total track count
         - bulk: Bulk operations (requires track_ids, bulk_operation, value)
 
-        Args:
-            operation: Operation to perform
-            track_id: Track number (1-based) for single-track operations
-            track_ids: List of track IDs for bulk operations
-            value: True/False for mute/solo/arm operations
-            bulk_operation: For bulk op: 'mute', 'solo', or 'arm'
+        ## Return Format
+        {"success": bool, "operation": str, "tracks"?: list, "track_id"?: int, "message"?: str, "error"?: str}
 
-        Returns:
-            Operation result with track data
-
-        Examples:
-            reaper_tracks("list")                           # All tracks
-            reaper_tracks("info", track_id=1)              # Track 1 info
-            reaper_tracks("mute", track_id=2, value=True)  # Mute track 2
-            reaper_tracks("solo", track_id=1)              # Solo track 1
-            reaper_tracks("arm", track_id=3, value=True)   # Arm track 3
-            reaper_tracks("bulk", track_ids=[1,2,3], bulk_operation="mute", value=True)
+        ## Examples
+        reaper_tracks(operation="list")
+        reaper_tracks(operation="mute", track_id=2, value=True)
+        reaper_tracks(operation="bulk", track_ids=[1, 2, 3], bulk_operation="mute", value=True)
         """
         valid_ops = ["list", "info", "mute", "solo", "arm", "count", "bulk"]
         if operation not in valid_ops:
@@ -183,9 +179,7 @@ def setup_tracks_portmanteau(mcp):
                         result = await client.set_track_solo(tid, value)
                     else:
                         result = await client.set_track_arm(tid, value)
-                    results.append(
-                        {"track_id": tid, "success": result.get("success", False)}
-                    )
+                    results.append({"track_id": tid, "success": result.get("success", False)})
 
                 successful = sum(1 for r in results if r["success"])
                 return {

@@ -11,9 +11,11 @@ OPERATIONS:
 """
 
 import logging
-from typing import Any
+from typing import Annotated, Any
 
-from ..osc_client import get_reaper_client, ensure_connected
+from pydantic import Field
+
+from ..osc_client import ensure_connected, get_reaper_client
 
 logger = logging.getLogger(__name__)
 
@@ -23,9 +25,13 @@ def setup_transport_portmanteau(mcp):
 
     @mcp.tool()
     async def reaper_transport(
-        operation: str,
+        operation: Annotated[str, Field(description="Operation: play, stop, pause, record, position, status")],
     ) -> dict[str, Any]:
         """Consolidated transport control for Reaper DAW.
+
+        [RATIONALE]
+        Consolidates 6 transport operations into one portmanteau tool to keep
+        the tool registry clean while providing full DAW transport control.
 
         OPERATIONS:
         - play: Start playback
@@ -35,18 +41,13 @@ def setup_transport_portmanteau(mcp):
         - position: Get current transport position
         - status: Get comprehensive transport state
 
-        Args:
-            operation: Operation to perform (play, stop, pause, record, position, status)
+        ## Return Format
+        {"success": bool, "operation": str, "message"?: str, "position"?: str, "connected"?: bool, "error"?: str}
 
-        Returns:
-            Operation result with transport state and status
-
-        Examples:
-            reaper_transport("play")           # Start playback
-            reaper_transport("stop")           # Stop playback
-            reaper_transport("record")         # Start recording
-            reaper_transport("position")       # Get current position
-            reaper_transport("status")         # Full transport status
+        ## Examples
+        reaper_transport(operation="play")
+        reaper_transport(operation="position")
+        reaper_transport(operation="status")
         """
         valid_ops = ["play", "stop", "pause", "record", "position", "status"]
         if operation not in valid_ops:
@@ -102,11 +103,7 @@ def setup_transport_portmanteau(mcp):
 
             elif operation == "position":
                 result = await client.get_position()
-                position = (
-                    result.get("args", ["0:00:00"])[0]
-                    if result.get("args")
-                    else "0:00:00"
-                )
+                position = result.get("args", ["0:00:00"])[0] if result.get("args") else "0:00:00"
                 return {
                     "operation": "position",
                     "position": position,
@@ -116,11 +113,7 @@ def setup_transport_portmanteau(mcp):
 
             elif operation == "status":
                 position_info = await client.get_position()
-                position = (
-                    position_info.get("args", ["0:00:00"])[0]
-                    if position_info.get("args")
-                    else "0:00:00"
-                )
+                position = position_info.get("args", ["0:00:00"])[0] if position_info.get("args") else "0:00:00"
                 return {
                     "operation": "status",
                     "connected": client.connected,

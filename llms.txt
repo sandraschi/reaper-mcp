@@ -1,0 +1,15 @@
+# Reaper-MCP
+
+> DAW automation via Reaper with OSC control. Austrian precision for professional audio production.
+
+## Key Links
+
+- [llms-full.txt](llms-full.txt) — full reference
+- [README](README.md) — quick start
+- [INSTALL](INSTALL.md) — installation guide
+
+## Quick Facts
+
+- Ports: 10797 (backend + MCP HTTP `/mcp`), 10796 (Vite dashboard)
+- 6 portmanteau tools: transport, tracks, project, system, reascript, orchestrator
+- OSC UDP on localhost:8000 → Reaper DAW

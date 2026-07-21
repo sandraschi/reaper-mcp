@@ -1,33 +1,70 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { API_BASE } from "../lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wifi, WifiOff, Activity, Shield, Zap } from "lucide-react";
+
+const BACKOFF_INTERVALS = [1, 2, 4, 8, 16];
 
 export function Dashboard() {
     const [health, setHealth] = useState<{ status: string; service: string } | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [logCount, setLogCount] = useState(0);
+    const [restarting, setRestarting] = useState(false);
+    const [backendOk, setBackendOk] = useState<boolean | null>(null);
+
+    const fetchHealth = useCallback(async (): Promise<boolean> => {
+      try {
+        const r = await fetch(API_BASE + "/api/health");
+        if (!r.ok) return false;
+        const d = await r.json();
+        setHealth(d); setError(null);
+        return true;
+      } catch (e) {
+        setError(String(e));
+        return false;
+      }
+    }, []);
 
     useEffect(() => {
-        fetch("/api/health").then(r => r.json()).then(d => { setHealth(d); setError(null); }).catch(e => setError(String(e)));
-        fetch("/api/logs/stats").then(r => r.json()).then(d => setLogCount(d.total || 0)).catch(() => {});
+      let cancelled = false;
+      (async () => {
+        for (const delay of BACKOFF_INTERVALS) {
+          if (cancelled) return;
+          const ok = await fetchHealth();
+          setBackendOk(ok);
+          if (ok) break;
+          await new Promise(r => setTimeout(r, delay * 1000));
+        }
+        if (!cancelled) {
+          const ok = await fetchHealth();
+          setBackendOk(ok);
+        }
+      })();
+      return () => { cancelled = true; };
+    }, [fetchHealth]);
+
+    useEffect(() => {
+        fetch(API_BASE + "/api/logs/stats").then(r => r.json()).then(d => setLogCount(d.total || 0)).catch(() => {});
     }, []);
 
     const connected = health?.status === "ok";
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6" data-testid="dashboard">
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-2xl font-bold tracking-tight text-white">Reaper Dashboard</h2>
                     <p className="text-slate-400">DAW orchestration and transport telemetry</p>
                 </div>
-                <div className={[
-                    "flex items-center gap-2 px-4 py-2 rounded-xl border text-sm",
-                    connected ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-red-500/10 border-red-500/20 text-red-400",
-                ].join(" ")}>
-                    {connected ? <Wifi size={14} /> : <WifiOff size={14} />}
-                    {connected ? "Connected" : "Offline"}
-                </div>
+                <div className="flex items-center gap-3">
+                  <div className={[
+                      "flex items-center gap-2 px-4 py-2 rounded-xl border text-sm",
+                      connected ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-red-500/10 border-red-500/20 text-red-400",
+                  ].join(" ")}>
+                      {connected ? <Wifi size={14} /> : <WifiOff size={14} />}
+                      <span data-testid="backend-dot">{connected ? "Connected" : "Offline"}</span>
+                  </div>
+                  </div>
             </div>
 
             {/* KPI Cards */}

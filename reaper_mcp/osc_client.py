@@ -3,9 +3,10 @@ osc_client.py - OSC communication with Reaper DAW
 Real-time bidirectional control via Open Sound Control protocol
 """
 
-import logging
-from typing import Dict, Any, Optional
 import asyncio
+import logging
+from typing import Any
+
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_server import AsyncIOOSCUDPServer
 from pythonosc.udp_client import SimpleUDPClient
@@ -37,9 +38,7 @@ class ReaperOSCClient:
             self.client = SimpleUDPClient(self.host, self.port)
 
             # Create server for receiving responses (on port+1)
-            self.server = AsyncIOOSCUDPServer(
-                (self.host, self.port + 1), self.dispatcher, asyncio.get_event_loop()
-            )
+            self.server = AsyncIOOSCUDPServer((self.host, self.port + 1), self.dispatcher, asyncio.get_event_loop())
 
             # Start server
             transport, protocol = await self.server.create_serve_endpoint()
@@ -119,7 +118,7 @@ class ReaperOSCClient:
         return await self.send_command("/ping")
 
     # Transport control methods
-    async def play_transport(self) -> Dict[str, Any]:
+    async def play_transport(self) -> dict[str, Any]:
         """Start playback"""
         success = await self.send_command("/play")
         await asyncio.sleep(0.1)  # Wait for response
@@ -129,7 +128,7 @@ class ReaperOSCClient:
             "status": self.last_status.get("transport", {}),
         }
 
-    async def stop_transport(self) -> Dict[str, Any]:
+    async def stop_transport(self) -> dict[str, Any]:
         """Stop playback"""
         success = await self.send_command("/stop")
         await asyncio.sleep(0.1)
@@ -139,7 +138,7 @@ class ReaperOSCClient:
             "status": self.last_status.get("transport", {}),
         }
 
-    async def pause_transport(self) -> Dict[str, Any]:
+    async def pause_transport(self) -> dict[str, Any]:
         """Pause playback"""
         success = await self.send_command("/pause")
         await asyncio.sleep(0.1)
@@ -149,7 +148,7 @@ class ReaperOSCClient:
             "status": self.last_status.get("transport", {}),
         }
 
-    async def record_transport(self) -> Dict[str, Any]:
+    async def record_transport(self) -> dict[str, Any]:
         """Start recording"""
         success = await self.send_command("/record")
         await asyncio.sleep(0.1)
@@ -159,7 +158,7 @@ class ReaperOSCClient:
             "status": self.last_status.get("transport", {}),
         }
 
-    async def get_position(self) -> Dict[str, Any]:
+    async def get_position(self) -> dict[str, Any]:
         """Get current playback position"""
         await self.send_command("/position")
         await asyncio.sleep(0.1)
@@ -179,7 +178,7 @@ class ReaperOSCClient:
 
         return 0  # Default if no response
 
-    async def get_track_info(self, track_id: int) -> Dict[str, Any]:
+    async def get_track_info(self, track_id: int) -> dict[str, Any]:
         """Get information for specific track"""
         # Request track info
         await self.send_command(f"/track/{track_id}/name")
@@ -216,23 +215,23 @@ class ReaperOSCClient:
 
         return track_data
 
-    async def set_track_arm(self, track_id: int, armed: bool) -> Dict[str, Any]:
+    async def set_track_arm(self, track_id: int, armed: bool) -> dict[str, Any]:
         """Arm or disarm track for recording"""
         success = await self.send_command(f"/track/{track_id}/recarm", int(armed))
         return {"track_id": track_id, "armed": armed, "success": success}
 
-    async def set_track_mute(self, track_id: int, muted: bool) -> Dict[str, Any]:
+    async def set_track_mute(self, track_id: int, muted: bool) -> dict[str, Any]:
         """Mute or unmute track"""
         success = await self.send_command(f"/track/{track_id}/mute", int(muted))
         return {"track_id": track_id, "muted": muted, "success": success}
 
-    async def set_track_solo(self, track_id: int, solo: bool) -> Dict[str, Any]:
+    async def set_track_solo(self, track_id: int, solo: bool) -> dict[str, Any]:
         """Solo or unsolo track"""
         success = await self.send_command(f"/track/{track_id}/solo", int(solo))
         return {"track_id": track_id, "solo": solo, "success": success}
 
     # Project methods
-    async def get_project_info(self) -> Dict[str, Any]:
+    async def get_project_info(self) -> dict[str, Any]:
         """Get current project information"""
         # Request project info
         await self.send_command("/project/name")
@@ -251,20 +250,20 @@ class ReaperOSCClient:
             "last_update": project_info.get("timestamp", 0),
         }
 
-    async def save_project(self) -> Dict[str, Any]:
+    async def save_project(self) -> dict[str, Any]:
         """Save current project"""
         success = await self.send_command("/project/save")
         return {"action": "save", "success": success}
 
     # Marker methods
-    async def add_marker(self, position: float, name: str) -> Dict[str, Any]:
+    async def add_marker(self, position: float, name: str) -> dict[str, Any]:
         """Add marker at specific position (in seconds)"""
         success = await self.send_command("/marker/add", position, name)
         return {"position": position, "name": name, "success": success}
 
 
 # Global client instance
-_reaper_client: Optional[ReaperOSCClient] = None
+_reaper_client: ReaperOSCClient | None = None
 
 
 async def get_reaper_client() -> ReaperOSCClient:

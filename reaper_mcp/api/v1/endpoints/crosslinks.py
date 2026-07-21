@@ -78,9 +78,7 @@ def _normalize_repo_info(raw: dict[str, Any]) -> RepoLinkInfo:
         api_base=raw.get("api_base"),
         tags=list(raw.get("tags", [])),
         notes=raw.get("notes"),
-        detected_files=_collect_detected_files(repo_path)
-        if repo_path.exists() and repo_path.is_dir()
-        else [],
+        detected_files=_collect_detected_files(repo_path) if repo_path.exists() and repo_path.is_dir() else [],
     )
 
 
@@ -104,9 +102,7 @@ async def list_crosslinked_repos(
     ),
 ) -> list[RepoLinkInfo]:
     """List explicitly registered repos and optionally discovered repo folders."""
-    links: dict[str, RepoLinkInfo] = {
-        name: _normalize_repo_info(raw) for name, raw in _crosslink_registry.items()
-    }
+    links: dict[str, RepoLinkInfo] = {name: _normalize_repo_info(raw) for name, raw in _crosslink_registry.items()}
 
     if include_discovered and DEFAULT_REPO_ROOT.exists() and DEFAULT_REPO_ROOT.is_dir():
         for repo_dir in DEFAULT_REPO_ROOT.iterdir():
@@ -208,7 +204,7 @@ async def get_repo_endpoint_templates(repo_name: str) -> dict[str, Any]:
 
 @router.get("/search")
 async def search_crosslinks(
-    q: str = Query(..., min_length=1, description="Search by repo name, tag, or notes")
+    q: str = Query(..., min_length=1, description="Search by repo name, tag, or notes"),
 ) -> dict[str, Any]:
     """Search registry by name, tags, and notes content."""
     query = q.lower().strip()

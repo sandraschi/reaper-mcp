@@ -59,7 +59,14 @@ def create_mcp() -> FastMCP:
         if skills_root.is_dir():
             mcp.add_provider(SkillsDirectoryProvider(roots=[skills_root]))
     except ImportError:
-        pass
+        import logging
+
+        logging.getLogger(__name__).warning("SkillsDirectoryProvider not available")
+
+    @mcp.resource("status://reaper/config")
+    async def reaper_config_resource() -> str:
+        """Live Reaper MCP config snapshot."""
+        return "## Reaper-MCP Config\n\n- Tool mode: portmanteau\n- OSC host: 127.0.0.1\n- OSC port: 8000\n"
 
     return mcp
 

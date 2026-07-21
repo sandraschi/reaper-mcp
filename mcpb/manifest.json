@@ -1,70 +1,27 @@
 {
+  "manifest_version": "0.2",
   "name": "reaper-mcp",
   "version": "1.0.0",
-  "description": "Austrian precision Digital Audio Workstation automation via Reaper DAW with bidirectional OSC communication",
-  "author": "Sandra",
-  "license": "MIT",
-  "homepage": "https://github.com/sandraschi/reaper-mcp",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/sandraschi/reaper-mcp"
-  },
-  "main": "server/server.py",
-  "mcp": {
-    "version": "1.0",
-    "capabilities": [
-      "tools"
-    ],
-    "prompts": {
-      "system": "assets/prompts/system.md",
-      "recording_workflow": "assets/prompts/recording_workflow.md",
-      "mixing_mastering": "assets/prompts/mixing_mastering.md",
-      "production_tips": "assets/prompts/production_tips.md",
-      "troubleshooting": "assets/prompts/troubleshooting.md"
+  "description": "Austrian precision DAW automation via Reaper with OSC control. 6 portmanteau tools for transport, tracks, project, system, reascript, and orchestrator.",
+  "author": { "name": "Sandra" },
+  "server": {
+    "type": "python",
+    "entry_point": "server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["run", "--directory", "${PWD}", "reaper-mcp"],
+      "env": {
+        "PYTHONPATH": "${PWD}",
+        "PYTHONUNBUFFERED": "1"
+      }
     }
   },
-  "runtime": {
-    "python": ">=3.9"
-  },
-  "dependencies": {
-    "fastmcp": ">=2.14.4",
-    "python-osc": ">=1.8.0",
-    "pydantic": ">=2.0.0",
-    "reapy-boost": ">=0.5.0"
-  },
-  "features": [
-    "Transport control (play, stop, pause, record)",
-    "Track management (mute, solo, arm, bulk operations)",
-    "Project automation (save, markers, rendering)",
-    "Bidirectional OSC communication",
-    "Real-time status monitoring",
-    "Session management",
-    "Marker and region control",
-    "Austrian engineering quality",
-    "ReaScript Python integration"
-  ],
-  "requirements": {
-    "software": [
-      "Reaper DAW 6.0 or later"
-    ],
-    "config": [
-      "OSC enabled in Reaper preferences"
-    ],
-    "network": [
-      "Ports 8000-8001 available for OSC"
-    ]
-  },
-  "keywords": [
-    "reaper",
-    "daw",
-    "audio",
-    "production",
-    "recording",
-    "mixing",
-    "automation",
-    "osc",
-    "austria",
-    "reascript",
-    "python"
+  "tools": [
+    { "name": "reaper_transport", "description": "Playback control (play, stop, pause, record, position, status)" },
+    { "name": "reaper_tracks", "description": "Track management (list, info, mute, solo, arm, count, bulk)" },
+    { "name": "reaper_project", "description": "Project operations (info, save, marker, render, stats)" },
+    { "name": "reaper_system", "description": "System status (status, help, capabilities)" },
+    { "name": "reaper_reascript", "description": "ReaScript execution (run, setup, api_help)" },
+    { "name": "reaper_orchestrator", "description": "SG2-to-mix workflow automation (stem_import, fx_chain, regions, full_pipeline)" }
   ]
 }
