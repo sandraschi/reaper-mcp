@@ -9,7 +9,7 @@ uv run python -m reaper_mcp.server
 # Tests
 uv run pytest tests/ -q
 # Lint
-uv run ruff check src/ tests/
+uv run ruff check reaper_mcp/ tests/
 ```
 
 ## Ports

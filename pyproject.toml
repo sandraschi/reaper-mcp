@@ -23,9 +23,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Multimedia :: Sound/Audio :: Analysis",
     "Topic :: Multimedia :: Sound/Audio :: Players",
@@ -50,11 +47,11 @@ test = ["pytest>=8.0", "pytest-asyncio", "httpx"]
 dev = ["ruff>=0.9.0", "mypy"]
 
 [project.urls]
-Homepage = "https://github.com/sandra/reaper-mcp"
-Documentation = "https://reaper-mcp.readthedocs.io/"
-Repository = "https://github.com/sandra/reaper-mcp.git"
-Issues = "https://github.com/sandra/reaper-mcp/issues"
-Changelog = "https://github.com/sandra/reaper-mcp/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/sandraschi/reaper-mcp"
+Documentation = "https://github.com/sandraschi/reaper-mcp#readme"
+Repository = "https://github.com/sandraschi/reaper-mcp"
+Issues = "https://github.com/sandraschi/reaper-mcp/issues"
+Changelog = "https://github.com/sandraschi/reaper-mcp/blob/main/CHANGELOG.md"
 
 [project.scripts]
 reaper-mcp = "reaper_mcp.__main__:main"
@@ -64,50 +61,6 @@ packages = ["reaper_mcp"]
 
 [tool.hatch.build.targets.wheel.force-include]
 "prompts" = "reaper_mcp/prompts"
-
-[tool.black]
-line-length = 100
-target-version = ['py39', 'py310', 'py311', 'py312']
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-  # directories
-  \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | build
-  | dist
-)/
-'''
-
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-line_length = 100
-known_first_party = ["reaper_mcp"]
-known_third_party = ["fastmcp", "pydantic"]
-
-[tool.mypy]
-python_version = "3.9"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-check_untyped_defs = true
-disallow_untyped_decorators = true
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_no_return = true
-warn_unreachable = true
-strict_equality = true
-
-[[tool.mypy.overrides]]
-module = "tests.*"
-ignore_errors = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -164,9 +117,4 @@ ignore = ["S101", "B008"]
 quote-style = "double"
 indent-style = "space"
 
-[dependency-groups]
-dev = [
-    "httpx>=0.28.1",
-    "pytest>=9.0.2",
-    "pytest-asyncio>=1.3.0",
-]
+
