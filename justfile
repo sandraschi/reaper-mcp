@@ -1,13 +1,20 @@
-set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
+﻿set windows-shell := ["powershell.exe", "-NoProfile", "-Command"]
 import 'scripts/just/fleet.just'
 
-# ── Dashboard ─────────────────────────────────────────────────────────────────
+# â”€â”€ Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 # Open the interactive recipe dashboard in the browser
 default:
     @just --list
 
-# ── Dev Commands ──────────────────────────────────────────────────────────────
+
+# Synchronize deps, pre-commit hooks, and web frontend
+bootstrap:
+    uv sync --extra dev
+    uv run pre-commit install
+    Set-Location web_sota; npm ci; if ($LASTEXITCODE -ne 0) { npm install }
+    Write-Host "Pre-commit hooks installed." -ForegroundColor Green
+# â”€â”€ Dev Commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 # Serve the MCP server
 serve:
@@ -34,16 +41,12 @@ gates-green: lint
     Set-Location '{{justfile_directory()}}'
     uv run pytest tests/ -q
 
-# Pack MCPB bundle
-mcpb-pack:
-    uv run mcpb pack . dist/reaper-mcp.mcpb
-
 # E2E Playwright tests
 e2e:
     Set-Location '{{justfile_directory()}}\web_sota'
     npx playwright test
 
-# ── Quality ───────────────────────────────────────────────────────────────────
+# â”€â”€ Quality â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 # Execute Ruff SOTA v13.1 linting
 lint:
@@ -56,7 +59,7 @@ fix:
     uv run ruff check reaper_mcp/ --fix --unsafe-fixes
     uv run ruff format reaper_mcp/
 
-# ── Tauri NSIS ─────────────────────────────────────────────────────────────────
+# â”€â”€ Tauri NSIS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 # Build the Tauri NSIS desktop installer (full pipeline: frontend -> Rust -> NSIS)
 build-native:
@@ -66,7 +69,3 @@ build-native:
 	foreach ($line in $envOutput) { $parts = $line.Split('=', 2); Set-Item -Path "env:$($parts[0])" -Value $parts[1] -ErrorAction SilentlyContinue }
 	Set-Location '{{justfile_directory()}}\native'
 	npx @tauri-apps/cli build --bundles nsis
-
-# Run the CUA smoke test against the installed NSIS app
-cua-nsis-test:
-	C:\Windows\py.exe scripts/cua-smoke.py

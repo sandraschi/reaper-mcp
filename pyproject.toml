@@ -1,4 +1,4 @@
-[build-system]
+﻿[build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
@@ -10,10 +10,10 @@ readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.12"
 authors = [
-    {name = "Sandra", email = "sandra@example.com"}
+    {name = "Sandra", email = "sandraschipal@gmail.com"}
 ]
 maintainers = [
-    {name = "Sandra", email = "sandra@example.com"}
+    {name = "Sandra", email = "sandraschipal@gmail.com"}
 ]
 keywords = ["mcp", "reaper", "daw", "audio", "automation", "osc"]
 classifiers = [
@@ -44,7 +44,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = ["pytest>=8.0", "pytest-asyncio", "httpx"]
-dev = ["ruff>=0.9.0", "mypy"]
+dev = ["ruff>=0.9.0", "mypy", "pre-commit>=4.6.1"]
 
 [project.urls]
 Homepage = "https://github.com/sandraschi/reaper-mcp"
@@ -116,5 +116,3 @@ ignore = ["S101", "B008"]
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
-
-
