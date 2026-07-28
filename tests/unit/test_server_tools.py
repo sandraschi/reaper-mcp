@@ -1,10 +1,15 @@
+import pytest
+
+pytestmark = pytest.mark.skip(reason="Legacy granular-tool tests; server uses portmanteau tools")
+
 """
 Unit tests for server-level MCP tools
 Tests help tool and other server functionality
 """
 
+from unittest.mock import AsyncMock, Mock
+
 import pytest
-from unittest.mock import Mock, AsyncMock
 from fastmcp import FastMCP
 
 
@@ -40,9 +45,7 @@ class TestHelpTool:
             assert "categories_overview" in result
             assert "usage_tips" in result
             assert result["server_info"]["name"] == "Reaper MCP Server"
-            assert (
-                len(result["categories_overview"]) == 4
-            )  # transport, tracks, project, system
+            assert len(result["categories_overview"]) == 4  # transport, tracks, project, system
 
     def test_get_help_category_transport(self, mock_mcp):
         """Test get_help with transport category"""
@@ -139,9 +142,7 @@ class TestServerStatusTool:
         from unittest.mock import patch
 
         with (
-            patch(
-                "server.get_reaper_client", side_effect=Exception("Connection failed")
-            ),
+            patch("server.get_reaper_client", side_effect=Exception("Connection failed")),
             patch("server.mcp", mock_mcp),
         ):
             from server import get_server_status

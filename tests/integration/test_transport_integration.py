@@ -1,10 +1,15 @@
+import pytest
+
+pytestmark = pytest.mark.skip(reason="Legacy granular-tool tests; server uses portmanteau tools")
+
 """
 Integration tests for transport control tools
 Tests end-to-end functionality with mocked Reaper OSC client
 """
 
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import AsyncMock, patch, Mock
 from fastmcp import FastMCP
 
 

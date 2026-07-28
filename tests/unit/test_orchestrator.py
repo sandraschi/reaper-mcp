@@ -1,7 +1,6 @@
 """
 Unit tests for reaper_mcp.portmanteau.orchestrator helpers.
 """
-# ruff: noqa: S101
 
 from reaper_mcp.portmanteau.orchestrator import (
     _normalize_regions,

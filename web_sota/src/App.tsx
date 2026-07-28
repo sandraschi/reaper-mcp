@@ -1,16 +1,16 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AppLayout } from '@/components/layout/app-layout';
-import { Dashboard } from '@/pages/dashboard';
-import { Transport } from '@/pages/transport';
-import { Tracks } from '@/pages/tracks';
-import { Mixer } from '@/pages/mixer';
-import { Settings } from '@/pages/settings';
-import { Tools } from '@/pages/tools';
-import { Reascript } from '@/pages/reascript';
-import { Status } from '@/pages/status';
-import { Help } from '@/pages/help';
-import Logging from '@/pages/Logging';
-import { ApiDocsPage } from './pages/api-docs';
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { AppLayout } from "@/components/layout/app-layout";
+import { Dashboard } from "@/pages/dashboard";
+import { Help } from "@/pages/help";
+import Logging from "@/pages/Logging";
+import { Mixer } from "@/pages/mixer";
+import { Reascript } from "@/pages/reascript";
+import { Settings } from "@/pages/settings";
+import { Status } from "@/pages/status";
+import { Tools } from "@/pages/tools";
+import { Tracks } from "@/pages/tracks";
+import { Transport } from "@/pages/transport";
+import { ApiDocsPage } from "./pages/api-docs";
 
 function App() {
   return (

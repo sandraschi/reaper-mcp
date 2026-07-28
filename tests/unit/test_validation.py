@@ -4,11 +4,12 @@ Tests input validation functions for MCP server
 """
 
 import pytest
+
 from reaper_mcp.validation import (
+    CommonValidation,
+    ProjectValidation,
     TrackValidation,
     TransportValidation,
-    ProjectValidation,
-    CommonValidation,
     ValidationError,
 )
 
@@ -97,10 +98,7 @@ class TestProjectValidation:
         """Test valid marker name validation"""
         assert ProjectValidation.validate_marker_name("Verse 1") == "Verse 1"
         assert ProjectValidation.validate_marker_name("  Chorus  ") == "Chorus"
-        assert (
-            ProjectValidation.validate_marker_name("Marker with 123")
-            == "Marker with 123"
-        )
+        assert ProjectValidation.validate_marker_name("Marker with 123") == "Marker with 123"
 
     def test_validate_marker_name_invalid(self):
         """Test invalid marker name validation"""
@@ -136,9 +134,7 @@ class TestProjectValidation:
         valid_qualities = ["high", "medium", "low", "fast"]
         for quality in valid_qualities:
             assert ProjectValidation.validate_quality(quality) == quality.lower()
-            assert (
-                ProjectValidation.validate_quality(quality.upper()) == quality.lower()
-            )
+            assert ProjectValidation.validate_quality(quality.upper()) == quality.lower()
 
     def test_validate_quality_invalid(self):
         """Test invalid quality validation"""

@@ -43,7 +43,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = ["pytest>=8.0", "pytest-asyncio", "httpx"]
-dev = ["ruff>=0.16.0,<0.17", "mypy", "pre-commit>=4.6.1"]
+dev = ["ruff>=0.16.0,<0.17", "mypy", "pre-commit>=4.6.1", "pytest>=8.0", "pytest-asyncio", "pytest-cov", "httpx"]
 
 [project.urls]
 Homepage = "https://github.com/sandraschi/reaper-mcp"

@@ -21,19 +21,34 @@ sys.modules["pythonosc.udp_client"] = MagicMock()
 import server
 
 
+class _MockReaperClient:
+    host = "127.0.0.1"
+    port = 8000
+    connected = True
+    last_status = {}
+
+    async def get_track_count(self) -> int:
+        return 5
+
+    async def get_position(self):
+        return {"args": ["0:00:00"]}
+
+
 @pytest.fixture
 def mock_osc_client(monkeypatch):
     """Mock the OSC client to avoid network calls."""
-    mock_client = AsyncMock()
-    mock_client.host = "127.0.0.1"
-    mock_client.port = 8000
-    mock_client.connected = True
+    mock_client = _MockReaperClient()
 
     async def mock_get_client():
         return mock_client
 
     monkeypatch.setattr("reaper_mcp.osc_client.get_reaper_client", mock_get_client)
-    monkeypatch.setattr("reaper_mcp.osc_client.ensure_connected", AsyncMock(return_value=True))
+    monkeypatch.setattr("reaper_mcp.portmanteau.tracks.get_reaper_client", mock_get_client)
+    monkeypatch.setattr("reaper_mcp.portmanteau.transport.get_reaper_client", mock_get_client)
+    ens = AsyncMock(return_value=True)
+    monkeypatch.setattr("reaper_mcp.osc_client.ensure_connected", ens)
+    monkeypatch.setattr("reaper_mcp.portmanteau.tracks.ensure_connected", ens)
+    monkeypatch.setattr("reaper_mcp.portmanteau.transport.ensure_connected", ens)
     return mock_client
 
 
@@ -41,5 +56,4 @@ def mock_osc_client(monkeypatch):
 def mcp_server(mock_osc_client):
     """Create a FastMCP server instance with mocked dependencies."""
     os.environ["REAPER_TOOL_MODE"] = "portmanteau"
-    # Re-call create_server to get the configured mcp instance
     return server.create_server()
