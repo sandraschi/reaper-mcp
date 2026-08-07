@@ -45,7 +45,7 @@ function Run-Tests {
         & python -m pytest $pytestArgs | Tee-Object -FilePath $OutputFile
 
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "âœ“ $TestName tests passed" -ForegroundColor Green
+            Write-Host "âœ" $TestName tests passed" -ForegroundColor Green
             return $true
         } else {
             Write-Host "âœ- $TestName tests failed" -ForegroundColor Red
@@ -89,11 +89,11 @@ Write-Host "TEST SUMMARY" -ForegroundColor Yellow
 Write-Host "=" * 50 -ForegroundColor Yellow
 
 if ($allPassed) {
-    Write-Host "âœ“ All tests passed!" -ForegroundColor Green
+    Write-Host "âœ" All tests passed!" -ForegroundColor Green
     Write-Host "ðŸŽ¼ Ready for Austrian audio automation!" -ForegroundColor Green
     exit 0
 } else {
     Write-Host "âœ- Some tests failed. Check test output above." -ForegroundColor Red
-    Write-Host "ðŸ“ Test results saved to: $OutputDir" -ForegroundColor Yellow
+    Write-Host "ðŸ" Test results saved to: $OutputDir" -ForegroundColor Yellow
     exit 1
 }
