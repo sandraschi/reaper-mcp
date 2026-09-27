@@ -35,7 +35,7 @@ export function ApiDocsPage() {
           </CardHeader>
           <CardContent className="text-xs text-slate-400 space-y-1">
             <code className="block text-blue-400">GET /api/v1/tools</code>
-            <code className="block text-amber-400">POST /api/v1/tools/{name}</code>
+            <code className="block text-amber-400">POST /api/v1/tools/{"{name}"}</code>
           </CardContent>
         </Card>
         <Card className="border-slate-800 bg-slate-950/50">

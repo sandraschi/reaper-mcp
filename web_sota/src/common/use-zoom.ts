@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 const ZOOM_LEVELS = [0.8, 1.0, 1.25, 1.5, 2.0, 3.0];
 function useZoom() {
-  const [_zoomIndex, setZoomIndex] = useState(() => {
+  const [, setZoomIndex] = useState(() => {
     try {
       const saved = localStorage.getItem("tauri-zoom");
       return saved ? ZOOM_LEVELS.indexOf(parseFloat(saved)) : 1;
@@ -14,9 +14,14 @@ function useZoom() {
     localStorage.setItem("tauri-zoom", String(level));
     try {
       const { getCurrentWindow } = await import("@tauri-apps/api/window");
-      await getCurrentWindow().setZoom(level);
-      return;
-    } catch {}
+      const win = getCurrentWindow() as unknown as { setZoom?: (n: number) => Promise<void> };
+      if (typeof win.setZoom === "function") {
+        await win.setZoom(level);
+        return;
+      }
+    } catch {
+      /* Tauri runtime absent in web build - CSS zoom fallback below. */
+    }
     document.documentElement.style.zoom = String(level);
   }, []);
   useEffect(() => {
