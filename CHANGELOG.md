@@ -1,3 +1,14 @@
+# Changelog
+
+All notable changes to **Reaper MCP Server** will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased] — 2026-09-27
+
+### Added
+- **Lua scripting**: `reaper_reascript` gains `lua_list/get/save/delete/run` ops (REAPER-native Lua via `reaper.*` API; run registers through `RPR_AddRemoveReaScript` + `Main_OnCommandEx`, needs reapy + running REAPER, CRUD works without). New **Lua Scripts** webapp page (library, editor, bundled examples, guarded delete). `data/lua_scripts/` library dir (gitignored).
 
 ## [Unreleased] — 2026-07-13
 
@@ -29,12 +40,14 @@
 ### Changed
 - Frontend API calls use absolute http://127.0.0.1:{port} URLs in production build
 - CORS middleware includes allow_origin_regex for tauri.localhost
-# Changelog
+- `build.ps1` bundles `.env.example` (NOT `.env`)
 
-All notable changes to **Reaper MCP Server** will be documented in this file.
+### Fixed
+- **ASGI load**: Resolve "Could not import module reaper_mcp.server" by adding `server.py` and running backend from project root.
+- **Dependencies**: Added `fastapi`, `uvicorn[standard]` to `pyproject.toml`.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### Documentation
+- **README**: FastMCP 3.1, five portmanteau tools, prompts/skills/agentic, sampling note, web_sota ports 10796/10797 and `/mcp`. Architecture blurb updated.
 
 ## [2.2.0] - 2026-03-08
 
@@ -44,6 +57,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Skills**: Optional `SkillsDirectoryProvider` for `reaper_mcp/skills`; bundled `reaper-daw-workflow` SKILL.
 - **Server module**: `reaper_mcp/server.py` for ASGI (`uvicorn reaper_mcp.server:app`) and stdio (`mcp.run()`); `reaper_mcp/mcp_app.py` single MCP instance with portmanteau tools and prompts.
 - **FastAPI mount**: Backend mounts MCP at `/mcp` via `mcp.http_app()`; REST at `/api/v1/tools` (list/call).
+- **Stdio**: `python -m reaper_mcp` / `reaper-mcp` CLI runs MCP stdio server (`mcp.run()`); web backend via `uvicorn reaper_mcp.server:app`.
+- **ReaScript**: Removed unused `Context` parameter from `reaper_reascript`; ruff/format fixes (B904, N812, S102, S104).
 
 ### Changed
 - **Webapp**: Frontend uses REST (GET/POST `/api/v1/tools`) on port 10797; removed JSON-RPC `/messages`. `mcp_client.ts` uses `VITE_BACKEND_URL` (default localhost:10797). Status, Help, ReaScript, Tools pages use REST response shape `{ status, result?, message? }`.
@@ -65,11 +80,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Extensive Testing Scaffold**: Added `conftest.py` with mocks, unit tests, and E2E verification
 - **Webapp Launcher Tool**: `start_webapp` tool added to `reaper_system` for self-actuation
 - **Improved Status Page**: Enhanced documentation and monitoring in the SOTA dashboard
-
-### Technical Improvements
-- Refactored frontend communication to use robust JSON-RPC via `mcp_client`
-- Added `verify_e2e.py` for headless stdio verification
-- Fixed E402 and F841 linting issues across the codebase
+- **ReaScript JSON Support**: `reaper_reascript` now returns structured JSON via `_result` variable
+- **Extensive Testing Scaffold**: Added `conftest.py` with mocks, unit tests, and E2E verification
+- **Webapp Launcher Tool**: `start_webapp` tool added to `reaper_system` for self-actuation
+- **Improved Status Page**: Enhanced documentation and monitoring in the SOTA dashboard
 
 ### Changed
 - **Error handling** improved with validation and graceful degradation
@@ -121,4 +135,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 *"Sin temor y sin esperanza" - Practical audio automation without hype.* 🎼🇦🇹
-

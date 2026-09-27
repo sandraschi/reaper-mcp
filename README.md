@@ -43,7 +43,7 @@ If you don't have `just` installed:
 | `reaper_tracks` | list, info, mute, solo, arm, count, bulk | Track management |
 | `reaper_project` | info, save, marker, render, stats | Project operations |
 | `reaper_system` | status, help, capabilities | System status |
-| `reaper_reascript` | run, setup, api_help | ReaScript execution and API help |
+| `reaper_reascript` | run, setup, api_help, lua_list, lua_get, lua_save, lua_delete, lua_run | ReaScript execution, API help, and Lua script CRUD |
 | `reaper_orchestrator` | stem_import, fx_chain, regions, full_pipeline | SG2-to-mix workflow automation |
 
 ##  Quick Start
