@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/app-layout";
 import { Dashboard } from "@/pages/dashboard";
 import { Help } from "@/pages/help";
 import Logging from "@/pages/Logging";
+import { LuaScripts } from "@/pages/lua-scripts";
 import { Mixer } from "@/pages/mixer";
 import { Reascript } from "@/pages/reascript";
 import { Settings } from "@/pages/settings";
@@ -23,6 +24,7 @@ function App() {
           <Route path="/mixer" element={<Mixer />} />
           <Route path="/tools" element={<Tools />} />
           <Route path="/reascript" element={<Reascript />} />
+          <Route path="/lua-scripts" element={<LuaScripts />} />
           <Route path="/status" element={<Status />} />
           <Route path="/help" element={<Help />} />
           <Route path="/api-docs" element={<ApiDocsPage />} />
