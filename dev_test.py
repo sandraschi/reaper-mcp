@@ -6,14 +6,21 @@ Test OSC connection and tools without MCP client
 
 import asyncio
 import logging
-from reaper_mcp.osc_client import ReaperOSCClient, get_reaper_client
+import os
+from pathlib import Path
+
 from reaper_mcp import DEFAULT_OSC_HOST, DEFAULT_OSC_PORT
+from reaper_mcp.osc_client import ReaperOSCClient, get_reaper_client
+
+# Absolute log path: a bare filename lands in the host's cwd (BUG-063)
+LOG_DIR = Path(os.environ.get("LOCALAPPDATA") or Path.home()) / "reaper-mcp" / "logs"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 # Configure structured logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler(), logging.FileHandler("dev_test.log", mode="w")],
+    handlers=[logging.StreamHandler(), logging.FileHandler(LOG_DIR / "dev_test.log", mode="w")],
 )
 logger = logging.getLogger(__name__)
 
@@ -27,9 +34,7 @@ async def test_osc_connection():
     try:
         connected = await client.connect()
         if connected:
-            logger.info(
-                f"✅ Connected to Reaper OSC at {DEFAULT_OSC_HOST}:{DEFAULT_OSC_PORT}"
-            )
+            logger.info(f"✅ Connected to Reaper OSC at {DEFAULT_OSC_HOST}:{DEFAULT_OSC_PORT}")
 
             # Test ping
             ping_result = await client.ping()
