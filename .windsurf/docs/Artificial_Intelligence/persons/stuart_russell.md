@@ -69,4 +69,3 @@ Born in Portsmouth, England, Russell earned his BA with first-class honors in ph
 - [Artificial Intelligence: A Modern Approach](http://aima.cs.berkeley.edu/)
 - [Human Compatible](https://humancompatible.ai/book)
 - [The Future of Life Institute](https://futureoflife.org/) - Organization focused on AI safety
-

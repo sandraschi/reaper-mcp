@@ -70,4 +70,3 @@ Born in the United States, Sutton earned his BA in psychology from Stanford Univ
 - [DeepMind Research](https://deepmind.com/research/)
 - [Alberta Machine Intelligence Institute](https://www.amii.ca/)
 - [The Bitter Lesson](http://www.incompleteideas.net/IncIdeas/BitterLesson.html) - Sutton's influential essay on AI progress
-
