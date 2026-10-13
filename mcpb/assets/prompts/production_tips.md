@@ -107,4 +107,3 @@ Purple: FX
 ---
 
 **Austrian Efficiency**: Work smart, organize obsessively, deliver quality consistently!
-

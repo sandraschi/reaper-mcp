@@ -131,7 +131,7 @@ status = get_transport_status()
 # Verify tracks armed
 for track in [1, 2, 3, 4]:
     is_armed = get_track_arm_status(track)
-    
+
 # During recording
 # Monitor levels visually
 # Listen for issues (clicks, pops, distortion)
@@ -218,4 +218,3 @@ add_marker(name="Great take!")
 ---
 
 **Austrian Precision**: Prepare thoroughly, record cleanly, organize meticulously. Quality starts at the recording stage!
-

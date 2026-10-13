@@ -144,4 +144,3 @@ client.send_message("/play", [])
 ---
 
 **Austrian Reliability**: Prepare well, prevent problems, solve issues systematically! 🇦🇹
-

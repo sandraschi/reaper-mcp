@@ -11,7 +11,7 @@ parent_dir = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(parent_dir))
 
 # Import and run main server
-from server import main  # noqa: E402
+from server import main
 
 if __name__ == "__main__":
     main()
