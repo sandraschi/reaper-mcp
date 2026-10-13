@@ -56,4 +56,3 @@ Accurate citation is critical for academicredibility. Automated bibliography too
 ---
 
 [End of Chunk 2]
-
