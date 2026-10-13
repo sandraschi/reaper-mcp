@@ -4,7 +4,7 @@
 
 Working effectively with an agentic AI like Cascade requires a new set of habits. Following these best practices will help you avoid common frustrations and build a more productive partnership with your AI assistant. This guide outlines the key "Do's" to embrace and "Don'ts" to avoid for a smooth and efficient workflow.
 
---- 
+---
 
 ## What You Shouldo
 
@@ -27,7 +27,7 @@ Use the agent as your firstop foresearch. Ask ito investigate libraries, compare
 ### ✅ Do: Proactively Manage Context
 Help the agent by ensuring it has the right context. Keep relevant files open in theditor, and explicitly tell ito remember important decisions or project standards. The more contexthe agent has, the more helpful and accurate its assistance will be.
 
---- 
+---
 
 ## What You Should Avoid
 
