@@ -66,4 +66,3 @@ Born in Wimbledon, London, Hinton comes from a family of prominent scientists. H
 - [The Deep Learning Book](https://www.deeplearningbook.org/)
 - [Neural Networks for Machine Learning](https://www.coursera.org/learn/neural-networks) - Hinton's online course
 - [The Godfather in Conversation: Why Geoffrey Hinton is worried about the future of AI](https://www.cbc.ca/radio/ideas/the-godfather-in-conversation-why-geoffrey-hinton-is-worried-about-the-future-of-ai-1.6830779) - CBC Ideas
-
