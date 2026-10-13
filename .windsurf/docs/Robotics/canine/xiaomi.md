@@ -25,7 +25,7 @@ The second generation marked a significant leap forward in design, intelligence,
 ## Technology Stack
 CyberDog is built on a foundation of cutting-edge robotics technology, with a strong emphasis on perception and AI.
 
-- **AI Processing**: 
+- **AI Processing**:
   - **Gen 1**: NVIDIA Jetson Xavier NX
   - **Gen 2**: Xiaomi-developed NX chip + 2 co-processors
 - **Perception System**: The robot is equipped with a sophisticated sensor suite for comprehensivenvironmental awareness:
