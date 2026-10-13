@@ -193,7 +193,7 @@ for epoch in range(100):
     loss.backward()
     # Update parametersgd_optimizer.step()
     sgd_optimizer.clear_grad()
-    
+
     if (epoch+1) % 10 == 0:
         print(f'Epoch {epoch+1}, Loss: {loss.numpy()[0]:.4f}')
 ```

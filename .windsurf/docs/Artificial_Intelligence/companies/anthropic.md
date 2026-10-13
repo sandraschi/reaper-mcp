@@ -44,7 +44,7 @@ client = anthropic.Anthropic()
 with client.messages.stream(
     max_tokens=1024,
     messages=[{
-        "role": "user", 
+        "role": "user",
         "content": "Explain the concept of Constitutional AIn simple terms."
     }],
     model="claude-3-sonnet-20240229",
