@@ -76,7 +76,7 @@ Add to your `claude_desktop_config.json`:
   }
 }
 ```
-### Reaper OSC Setup 
+### Reaper OSC Setup
 
 1. Open **Reaper preferences** (Ctrl+P)
 2. Go to **Control/OSC/web**
@@ -117,7 +117,7 @@ Add to `claude_desktop_config.json`:
 "Arm track 1 for recording and start recording"
 ```
 
-### ReaScript JSON Support 
+### ReaScript JSON Support
 
 Scripts can now return structured data by setting the `_result` variable:
 
@@ -125,8 +125,8 @@ Scripts can now return structured data by setting the `_result` variable:
 import reapy
 project = reapy.Project.today()
 _result = {
-    "name": project.name, 
-    "tracks": project.n_tracks, 
+    "name": project.name,
+    "tracks": project.n_tracks,
     "sample_rate": project.sample_rate
 }
 ```
@@ -176,34 +176,34 @@ reaper_orchestrator(
 
 ```
 
-                        Claude / Cursor                          
-                         (MCP Client)                            
+                        Claude / Cursor
+                         (MCP Client)
 
                            MCP Protocol (stdio)
-                          
 
-                      Reaper MCP Server                          
-                        (FastMCP 3.1)                           
-     
-    Portmanteau Tools + Prompts + Skills (optional)             
-    transport  tracks  project  system  reascript           
-     
-                                                                 
-                                          
-                   OSC Client                                  
-                  (python-osc)                                 
-                                          
+
+                      Reaper MCP Server
+                        (FastMCP 3.1)
+
+    Portmanteau Tools + Prompts + Skills (optional)
+    transport  tracks  project  system  reascript
+
+
+
+                   OSC Client
+                  (python-osc)
+
 
                            OSC UDP (localhost:8000)
-                          
 
-                         Reaper DAW                              
-    
-                     OSC Control Surface                        
-    
-          
-   Transport     Tracks       Mixer         Project     
-          
+
+                         Reaper DAW
+
+                     OSC Control Surface
+
+
+   Transport     Tracks       Mixer         Project
+
 
 ```
 

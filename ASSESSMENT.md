@@ -1,7 +1,7 @@
 # reaper-mcp - Project Assessment
 
-**Category**: MCP Server  
-**Assessment Date**: 2026-01-01  
+**Category**: MCP Server
+**Assessment Date**: 2026-01-01
 **Status**: Production Ready
 
 ---
@@ -46,7 +46,7 @@
 ## 📚 **References**
 
 - [MCP Central Documentation Standards](../STANDARDS.md)
-- [FastMCP 2.12 Migration Guide](../FASTMCP_2.12_MIGRATION.md)
+- [FastMCP Standards Guide](../standards/FASTMCP_STANDARDS.md)
 - [MCPB Packaging Standards](../MCPB_PACKAGING_STANDARDS.md)
 - [Monitoring Standards](../monitoring/README.md)
 

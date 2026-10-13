@@ -12,6 +12,7 @@ PORTMANTEAU TOOLS (4 total, consolidated from 21):
 
 import logging
 import os
+
 from fastmcp import FastMCP
 
 # Configure logging
@@ -38,8 +39,8 @@ def create_server() -> FastMCP:
 
         setup_all_portmanteau_tools(mcp)
     else:
-        from reaper_mcp.tracks import register_track_tools
         from reaper_mcp.project import register_project_tools
+        from reaper_mcp.tracks import register_track_tools
 
         register_track_tools(mcp)
         register_project_tools(mcp)
