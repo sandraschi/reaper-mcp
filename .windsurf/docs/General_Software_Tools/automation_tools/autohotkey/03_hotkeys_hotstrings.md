@@ -64,7 +64,7 @@ The `#HotIf` directive is used for this. You specify a condition, and all hotkey
 
 -   `WinActive("ahk_class Notepad")` is a function that checks if the currently active window has the class name "Notepad". You can find a window's information using the "Window Spy" tool that comes with AutoHotkey.
 
---- 
+---
 
 ## Hotstrings: Automated Text Expansion
 
@@ -104,4 +104,3 @@ You can customize a hotstring's behavior using options placed between the firstw
 ```
 
 Hotkeys and hotstrings are the foundation upon which most AutoHotkey scripts are built. In the next chapter, we will explore how to make your scripts more dynamic with [Variables and Expressions](/automation_tools/autohotkey/./04_variables_expressions.md).
-
