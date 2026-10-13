@@ -1,8 +1,8 @@
 # MCP Elicitation Patterns - Interactive Tool Enhancement
 
-**Date**: July 23, 2025  
-**Context**: Sandra & Claudius MCP Server Factory 🇦🇹  
-**Purpose**: Intelligent parameter elicitation for insufficient data scenarios  
+**Date**: July 23, 2025
+**Context**: Sandra & Claudius MCP Server Factory 🇦🇹
+**Purpose**: Intelligent parameter elicitation for insufficient data scenarios
 
 ---
 
@@ -39,7 +39,7 @@ MCP: ✅ Muted track 3 (Guitar)
 @mcp.tool()
 async def mute_track(track_id: Optional[int] = None) -> Dict[str, Any]:
     """Mute a track with intelligent elicitation"""
-    
+
     if track_id is None:
         # Return elicitation request instead of error
         tracks = await get_tracks()
@@ -49,12 +49,12 @@ async def mute_track(track_id: Optional[int] = None) -> Dict[str, Any]:
             "_parameter": "track_id",
             "_prompt": "Which track would you like to mute?",
             "_options": [
-                {"value": t["id"], "label": f"{t['id']} ({t['name']})"} 
+                {"value": t["id"], "label": f"{t['id']} ({t['name']})"}
                 for t in tracks
             ],
             "_example": "You can say: 'track 3' or 'the guitar track'"
         }
-    
+
     # Normal execution with provided track_id
     return await perform_track_mute(track_id)
 ```
@@ -131,7 +131,7 @@ async def mute_track(track_id: Optional[int] = None) -> Dict[str, Any]:
 # Multiple bass tracks exist
 {
     "_elicitation": True,
-    "_request_type": "selection", 
+    "_request_type": "selection",
     "_parameter": "track_id",
     "_prompt": "Multiple bass tracks found. Which one?",
     "_options": [
@@ -158,7 +158,7 @@ async def mute_track(track_id: Optional[int] = None) -> Dict[str, Any]:
             "default": "wav"
         },
         "quality": {
-            "prompt": "Quality setting?", 
+            "prompt": "Quality setting?",
             "options": ["high", "medium", "low"],
             "default": "high"
         },
@@ -205,11 +205,11 @@ async def mute_track(track_id: Optional[int] = None) -> Dict[str, Any]:
 Claude: I need more information to mute the track.
         Which track would you like to mute?
         Available tracks:
-        • 1 (Drums)  
+        • 1 (Drums)
         • 2 (Bass)
         • 3 (Guitar)
         • 4 (Vocals)
-        
+
         You can say "track 3" or "the guitar track"
 ```
 
@@ -218,10 +218,10 @@ Claude: I need more information to mute the track.
 ```
 Claude: [Track Selection Interface]
         ○ Track 1 (Drums)
-        ○ Track 2 (Bass)  
+        ○ Track 2 (Bass)
         ○ Track 3 (Guitar) ← [selected]
         ○ Track 4 (Vocals)
-        
+
         [Mute Selected Track]
 ```
 
@@ -250,11 +250,11 @@ def elicitation_tool(require_params: List[str] = None):
             for param in require_params or []:
                 if kwargs.get(param) is None:
                     missing.append(param)
-            
+
             if missing:
                 # Generate elicitation response
                 return await generate_elicitation(func, missing, **kwargs)
-            
+
             # Normal execution
             return await func(*args, **kwargs)
         return wrapper
@@ -274,11 +274,11 @@ async def mute_track(track_id: Optional[int] = None) -> Dict[str, Any]:
 ```python
 async def infer_missing_params(func_name: str, **provided_kwargs):
     """Attempt to infer missing parameters from context"""
-    
+
     if func_name == "mute_track" and "track_id" not in provided_kwargs:
         # Try to infer from track names or current selection
         tracks = await get_tracks()
-        
+
         # Check for natural language hints in conversation context
         recent_messages = get_conversation_context()
         for msg in recent_messages:
@@ -286,7 +286,7 @@ async def infer_missing_params(func_name: str, **provided_kwargs):
                 guitar_tracks = [t for t in tracks if "guitar" in t["name"].lower()]
                 if len(guitar_tracks) == 1:
                     return {"track_id": guitar_tracks[0]["id"]}
-        
+
         # Fall back to elicitation
         return create_track_selection_elicitation(tracks)
 ```

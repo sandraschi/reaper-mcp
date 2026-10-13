@@ -1,8 +1,8 @@
 # Open Sound Control (OSC) - Audio Automation Standard
 
-**Date**: July 23, 2025  
-**Context**: Sandra & Claudius MCP Server Factory 🇦🇹  
-**Purpose**: OSC-enabled applications for MCP automation potential  
+**Date**: July 23, 2025
+**Context**: Sandra & Claudius MCP Server Factory 🇦🇹
+**Purpose**: OSC-enabled applications for MCP automation potential
 
 ---
 
@@ -130,7 +130,7 @@ Project:
 ### **High Priority Candidates** (Strong OSC + User Demand)
 
 1. **Ableton Live MCP** - Live performance automation
-2. **QLab MCP** - Theater/event automation  
+2. **QLab MCP** - Theater/event automation
 3. **TouchOSC MCP** - Custom controller generation
 4. **Max/MSP MCP** - Patch automation and control
 5. **VCV Rack MCP** - Modular synthesis automation
