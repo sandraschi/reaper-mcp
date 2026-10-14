@@ -1,8 +1,8 @@
-import subprocess
 import json
+import os
+import subprocess
 import sys
 import time
-import os
 
 
 def run_e2e_test():
@@ -12,9 +12,7 @@ def run_e2e_test():
     print("Starting E2E Test...")
 
     # Path to server
-    server_path = os.path.join(
-        os.path.dirname(__file__), "..", "reaper_mcp", "server.py"
-    )
+    server_path = os.path.join(os.path.dirname(__file__), "..", "reaper_mcp", "server.py")
 
     # Start server process
     process = subprocess.Popen(

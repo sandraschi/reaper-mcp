@@ -1,5 +1,6 @@
-import requests
 import json
+
+import requests
 
 URL = "http://localhost:10793/tools/call"
 
