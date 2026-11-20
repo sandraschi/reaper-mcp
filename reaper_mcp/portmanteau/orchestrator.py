@@ -10,6 +10,8 @@ from typing import Annotated, Any
 
 from pydantic import Field
 
+from ..dettato_bridge import dettato_status as _dettato_status
+from ..dettato_bridge import transcribe_audio_to_midi as _transcribe_audio_to_midi
 from .reascript import execute_reascript_code
 
 logger = logging.getLogger(__name__)
@@ -148,23 +150,50 @@ _result = {{"operation": "regions", "created": created, "count": len(created)}}
 """
 
 
+def _build_midi_import_script(midi_path: str, track_name: str) -> str:
+    escaped_midi = _escape_for_python_string(midi_path)
+    escaped_name = _escape_for_python_string(track_name)
+    return f"""
+midi_path = "{escaped_midi}"
+track_name = "{escaped_name}"
+track_index = int(RPR_CountTracks(0))
+RPR_InsertTrackAtIndex(track_index, True)
+track = RPR_GetTrack(0, track_index)
+RPR_GetSetMediaTrackInfo_String(track, "P_NAME", track_name, True)
+RPR_SetOnlyTrackSelected(track)
+RPR_InsertMedia(midi_path, 0)
+_result = {{"operation": "midi_import", "track_index": track_index + 1, "track_name": track_name, "midi_path": midi_path}}
+"""
+
+
 def setup_orchestrator_portmanteau(mcp):
     """Register high-level orchestration operations for stem-to-mix workflows."""
 
     @mcp.tool()
     async def reaper_orchestrator(
-        operation: Annotated[str, Field(description="Operation: stem_import, fx_chain, regions, full_pipeline")],
+        operation: Annotated[
+            str,
+            Field(
+                description="Operation: stem_import, fx_chain, regions, full_pipeline, audio_to_midi, dettato_status"
+            ),
+        ],
         stems_folder: Annotated[str | None, Field(description="Folder with SG2 stem files")] = None,
         vibe: Annotated[str | None, Field(description="Named vibe preset (classical_master, dark_techno)")] = None,
         fx_chain_path: Annotated[str | None, Field(description="Path to .RfxChain file")] = None,
         target_track_name: Annotated[str, Field(description="Target track for FX chain")] = "inst",
         regions_text: Annotated[str | None, Field(description="Regions as text: [name] start-end")] = None,
         regions: Annotated[list[dict[str, Any]] | None, Field(description="Regions as [{name, start, end}]")] = None,
+        audio_path: Annotated[str | None, Field(description="Input audio file path for audio_to_midi")] = None,
+        output_dir: Annotated[str | None, Field(description="Output directory for audio_to_midi (.mid/.json)")] = None,
+        device: Annotated[str, Field(description="Inference device for dettato: auto, cuda, or cpu")] = "auto",
+        import_to_reaper: Annotated[
+            bool, Field(description="If true, insert the transcribed .mid file into the active REAPER project")
+        ] = False,
     ) -> dict[str, Any]:
-        """High-level Reaper orchestration for stem ingest, FX chain assignment, and regions.
+        """High-level Reaper orchestration for stem ingest, FX chain assignment, regions, and audio-to-MIDI.
 
         [RATIONALE]
-        Consolidates the stem-to-mix production pipeline into one tool to avoid
+        Consolidates the stem-to-mix and audio-to-MIDI production pipeline into one tool to avoid
         tool registry bloat while preserving the full workflow surface.
 
         OPERATIONS:
@@ -172,6 +201,8 @@ def setup_orchestrator_portmanteau(mcp):
         - fx_chain: Apply .RfxChain to target track (requires fx_chain_path or vibe)
         - regions: Create regions from timestamp metadata (requires regions_text or regions)
         - full_pipeline: Run stem_import, fx_chain, and regions sequentially
+        - dettato_status: Check local dettato audio-to-MIDI CLI, offline weights, and ffmpeg availability
+        - audio_to_midi: Transcribe audio_path to multi-track MIDI via dettato (optionally import_to_reaper)
 
         ## Return Format
         {"success": bool, "operation": str, "message": str, "details"?: dict, "steps"?: dict, "error"?: str}
@@ -179,8 +210,10 @@ def setup_orchestrator_portmanteau(mcp):
         ## Examples
         reaper_orchestrator(operation="stem_import", stems_folder="C:/SG2/project1")
         reaper_orchestrator(operation="regions", regions_text="[verse] 00:10-00:30\\n[chorus] 00:45-01:15")
+        reaper_orchestrator(operation="dettato_status")
+        reaper_orchestrator(operation="audio_to_midi", audio_path="D:/audio/song.mp3", import_to_reaper=True)
         """
-        valid_ops = ["stem_import", "fx_chain", "regions", "full_pipeline"]
+        valid_ops = ["stem_import", "fx_chain", "regions", "full_pipeline", "audio_to_midi", "dettato_status"]
         if operation not in valid_ops:
             return {
                 "success": False,
@@ -189,6 +222,52 @@ def setup_orchestrator_portmanteau(mcp):
             }
 
         try:
+            if operation == "dettato_status":
+                status = _dettato_status()
+                return {
+                    "success": True,
+                    "operation": "dettato_status",
+                    "message": "dettato CLI is available" if status["available"] else "dettato CLI not found",
+                    "details": status,
+                }
+
+            if operation == "audio_to_midi":
+                if not audio_path:
+                    return {"success": False, "operation": "audio_to_midi", "error": "audio_path is required"}
+                transcription = _transcribe_audio_to_midi(
+                    audio_path=audio_path,
+                    output_dir=output_dir,
+                    device=device,
+                )
+                if not transcription.get("success"):
+                    return {"operation": "audio_to_midi", **transcription}
+
+                reaper_import: dict[str, Any] | None = None
+                if import_to_reaper:
+                    midi_path = transcription["midi_path"]
+                    track_label = Path(midi_path).stem
+                    reaper_import = execute_reascript_code(_build_midi_import_script(midi_path, track_label))
+                    if not reaper_import.get("success"):
+                        return {
+                            "success": False,
+                            "operation": "audio_to_midi",
+                            "message": "Transcription succeeded, but REAPER MIDI import failed",
+                            "details": transcription,
+                            "reaper_import": reaper_import,
+                            "error": reaper_import.get("error", "REAPER import failed"),
+                        }
+
+                return {
+                    "success": True,
+                    "operation": "audio_to_midi",
+                    "message": (
+                        "Audio transcribed to MIDI and imported into REAPER"
+                        if import_to_reaper
+                        else "Audio transcribed to MIDI"
+                    ),
+                    "details": transcription,
+                    **({"reaper_import": reaper_import.get("result", {})} if reaper_import else {}),
+                }
             if operation in ["stem_import", "full_pipeline"]:
                 if not stems_folder:
                     return {"success": False, "error": "stems_folder is required"}
